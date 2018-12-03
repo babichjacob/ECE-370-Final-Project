@@ -40,7 +40,7 @@ void ofApp::mouseDragged(int x, int y, int button){
 
 //--------------------------------------------------------------
 void ofApp::mousePressed(int x, int y, int button){
-	ofSetBackgroundColor(rand() % 256, rand() % 256, rand() % 256);
+
 }
 
 //--------------------------------------------------------------
@@ -56,6 +56,10 @@ void ofApp::mouseEntered(int x, int y){
 //--------------------------------------------------------------
 void ofApp::mouseExited(int x, int y){
 
+}
+
+void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
+	ofSetBackgroundColor(rand() % 256, rand() % 256, rand() % 256);
 }
 
 //--------------------------------------------------------------
