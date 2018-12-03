@@ -6,6 +6,8 @@ void ofApp::setup(){
 	ofSetFrameRate(60);
 
 	srand(time(NULL));
+
+	ui.setup();
 }
 
 //--------------------------------------------------------------
