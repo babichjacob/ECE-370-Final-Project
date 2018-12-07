@@ -43,6 +43,9 @@
     <ClCompile Include="src\UI.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\mp3.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -105,6 +108,9 @@
       <Filter>addons\ofxThreadedImageLoader\src</Filter>
     </ClInclude>
     <ClInclude Include="src\UI.h">
+      <Filter>src</Filter>
+    </ClInclude>
+    <ClInclude Include="src\mp3.h">
       <Filter>src</Filter>
     </ClInclude>
   </ItemGroup>
