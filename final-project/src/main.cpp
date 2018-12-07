@@ -1,8 +1,16 @@
 #include "ofMain.h"
 #include "ofApp.h"
+#include "mp3.h"
 
 //========================================================================
 int main( ){
+	cout << "main: begin program" << endl;
+
+	cout << "main: testing - switching to mp3_main now" << endl;
+
+	mp3_main();
+	return 0;
+
 	// Default, dummy size. Replaced two lines below.
 	ofSetupOpenGL(1280,720,OF_WINDOW);			// <-------- setup the GL context
 
@@ -15,5 +23,6 @@ int main( ){
 	// this kicks off the running of my app
 	// can be OF_WINDOW or OF_FULLSCREEN
 	// pass in width and height too:
+	cout << "main: running openFrameworks app" << endl;
 	ofRunApp(new ofApp());
 }
