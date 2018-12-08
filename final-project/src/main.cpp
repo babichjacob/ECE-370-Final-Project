@@ -9,6 +9,8 @@ int main( ){
 	cout << "main: testing - switching to mp3_main now" << endl;
 
 	mp3_main();
+
+	cout << "main: testing - mp3_main exited and the program will too now" << endl;
 	return 0;
 
 	// Default, dummy size. Replaced two lines below.

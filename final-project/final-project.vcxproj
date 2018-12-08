@@ -194,6 +194,7 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\mp3.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
+    <ClCompile Include="src\Song.cpp" />
     <ClCompile Include="src\UI.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -211,6 +212,7 @@
     <ClInclude Include="..\..\..\addons\ofxThreadedImageLoader\src\ofxThreadedImageLoader.h" />
     <ClInclude Include="src\mp3.h" />
     <ClInclude Include="src\ofApp.h" />
+    <ClInclude Include="src\Song.h" />
     <ClInclude Include="src\UI.h" />
   </ItemGroup>
   <ItemGroup>
