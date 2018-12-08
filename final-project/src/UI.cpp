@@ -1,5 +1,4 @@
 #include "UI.h"
-#include "ofMain.h"
 
 
 UI::UI()

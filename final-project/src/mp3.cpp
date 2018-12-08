@@ -1,23 +1,19 @@
-#include "mp3.h"
-#include "ID3v2.h"
-
-#include "Song.h"
-
 #include <exception>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
 
-using namespace std;
-// This is a new feature I need
-namespace filesystem = std::experimental::filesystem;
+
+#include "ID3v2.h"
+#include "Song.h"
+
+#include "mp3.h"
 
 
 void mp3_main() {
 	cout << "mp3_main: Hello!" << endl;
 
-	string music_path = "bin/data/Music";
-	filesystem::recursive_directory_iterator music_directory = filesystem::recursive_directory_iterator(music_path);
+	filesystem::recursive_directory_iterator music_directory = filesystem::recursive_directory_iterator(MUSIC_DIR);
 
 	// This is a foreach loop (much more modern than for loops)
 	for (auto &path : music_directory) {
@@ -30,13 +26,14 @@ void mp3_main() {
 			
 			
 			try {
-				Song song(path);
+				Song song(path.path());
 
 				// The runtime_error thrown in the constructor above will prevent this line from executing
 				song.print();
 			}
 			catch (runtime_error &e) {
 				// Just move on
+				(void) e;
 			}
 		}
 	}

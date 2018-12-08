@@ -1,18 +1,29 @@
 #include "Song.h"
-#include "ID3v2.h"
 
 
 Song::Song() {
 }
 
 
-Song::Song(filesystem::directory_entry path) {
-	set_from_file(path);
+Song::~Song()
+{
 }
 
 
-Song::~Song()
-{
+Song::Song(filesystem::path path) {
+	try {
+		// Try to save computational power by loading information from the cache
+		set_from_cache(path);
+	}
+	// But if that's not possible,
+	catch (runtime_error &e) {
+		if (string(e.what()).compare("not in cache") == 0) {
+			// Parse the MP3 itself (slow and computationally expensive)
+			set_from_file(path);
+			// And save the results to the cache
+			save_to_cache();
+		}
+	}
 }
 
 
@@ -38,19 +49,42 @@ string get_frame_data_as_string(const uint8_t *data, int data_length) {
 }
 
 
-void Song::set_from_file(filesystem::directory_entry path) {
-	cout << "Song::set_from_file: about to set from file " << path.path().string() << endl;
+void Song::save_to_cache() {
+	// Make a copy so we don't mutate the original path
+	filesystem::path music_root_path = filesystem::path(file_path);
+	filesystem::path cache_file_path = filesystem::path(CACHE_DIR);
 
-	ID3v2::Tag mp3_tag(path.path().string());
+	// Safety check: make sure we haven't called parent_path() until there are no parent paths left
+	// (this could happen)
+	while ((music_root_path.parent_path() != filesystem::path("bin/data/music")) && (music_root_path != filesystem::path(""))) {
+		music_root_path = music_root_path.parent_path();
+
+		cache_file_path /= music_root_path.filename();
+	}
+
+	cache_file_path /= file_path.filename().replace_extension("csv");
+	cout << "Cache path: " << cache_file_path.string() << endl;
+}
+
+
+void Song::set_from_cache(filesystem::path path) {
+	throw runtime_error("not in cache");
+
+	file_path = path;
+}
+
+
+void Song::set_from_file(filesystem::path path) {
+	cout << "Song::set_from_file: about to set from file " << path.string() << endl;
+
+	ID3v2::Tag mp3_tag(path.string());
 
 	if (!mp3_tag.IsValid()) {
 		cout << "Song::set_from_file: this is not a valid MP3 file -- bye" << endl;
-		throw runtime_error("invalid song");
+		throw runtime_error("invalid file -- not MP3");
 	}
-	
-	// Since the constructor will exit from the throw statement above if the file is invalid (not an MP3),
-	// we can continue on the assumption that we're working with a valid file
-	is_valid = true;
+
+	file_path = path;
 
 	// Extract all the useful data (these can't all be turned into their own methods
 	// because that was giving me a null pointer exception)
@@ -72,7 +106,7 @@ void Song::set_from_file(filesystem::directory_entry path) {
 
 	ID3v2::Frame::v23::TRCK *trck = dynamic_cast<ID3v2::Frame::v23::TRCK *>(mp3_tag.GetFrameWithName("TRCK"));
 	if (trck != nullptr) track_of_album = get_frame_data_as_string(trck->GetData(), trck->GetSize());
-	else track_of_album = "0/0";
+	else track_of_album = "1/1";
 
 	ID3v2::Frame::v23::TYER *tyer = dynamic_cast<ID3v2::Frame::v23::TYER *>(mp3_tag.GetFrameWithName("TYER"));
 	if (tpe1 != nullptr) year = stoi(get_frame_data_as_string(tyer->GetData(), tyer->GetSize()));

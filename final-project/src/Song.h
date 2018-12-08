@@ -1,30 +1,40 @@
 #pragma once
 
-#include "ID3v2.h"
+#include <chrono>
 #include <filesystem>
+#include <thread>
+
+#include "csv.h"
+#include "ID3v2.h"
+
+constexpr auto MUSIC_DIR = "bin/data/music";
+constexpr auto CACHE_DIR = "bin/data/.MyTunes/cache";
+
 using namespace std;
 // This is a new feature I need
 namespace filesystem = std::experimental::filesystem;
 
+
 class Song
 {
 private:
-	void set_from_file(filesystem::directory_entry path);
+	void save_to_cache();
+	void set_from_cache(filesystem::path path);
+	void set_from_file(filesystem::path path);
 
 public:
-	// Flag variable -- there's no way to know whether a given file will be valid
-	// until you try to instantiate a Song object from it
-	bool is_valid = false;
-
 	string title;
 	string album;
 	string artist;
 	string genre;
+	// Ex 4/7
 	string track_of_album;
 	int year;
 
+	filesystem::path file_path;
+
 	Song();
-	Song(filesystem::directory_entry path);
+	Song(filesystem::path path);
 	~Song();
 	void print();
 };
