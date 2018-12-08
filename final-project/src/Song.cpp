@@ -31,19 +31,19 @@ Song::Song(filesystem::path path) {
 
 string get_frame_data_as_string(const uint8_t *data, int data_length) {
 	string data_str = "";
-	int first_alphanumerical_index = -1;
+	int first_printable_index = -1;
 
-	// Hunt down the first index of an alphanumeric character (because everything before it will be garbage)
+	// Hunt down the first index of a "printable" character (because everything before it will be garbage)
 	for (int i = 0; i < data_length; i++) {
-		if (isalnum(data[i])) {
-			first_alphanumerical_index = i;
+		if (isprint(data[i])) {
+			first_printable_index = i;
 			break;
 		}
 	}
 
 	// Then add all the characters after it to the string
 	// (it occurred to me to use a substr method but I don't think that'll work because this isn't really a string or char array)
-	for (int i = first_alphanumerical_index; i < data_length; i++) {
+	for (int i = first_printable_index; i < data_length; i++) {
 		if ((data[i] != 0))	data_str += data[i];
 	}
 
