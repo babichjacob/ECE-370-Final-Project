@@ -33,16 +33,17 @@ void mp3_main() {
 			cout << "ID3v2 version: " << mp3_tag.GetVersion().GetStringValue() << endl;
 			frames = mp3_tag.GetFrames();
 
-			ID3v2::Frame::v23::TIT2 *tit2;
-			tit2 = dynamic_cast<ID3v2::Frame::v23::TIT2 *>(mp3_tag.GetFrameWithName("TIT2"));
-			cout << (tit2 == nullptr ? "Null pointer" : "Not null pointer") << endl;
+			ID3v2::Frame::v23::TIT2 *tit2 = dynamic_cast<ID3v2::Frame::v23::TIT2 *>(mp3_tag.GetFrameWithName("TIT2"));
+			
 			const uint8_t *data = tit2->GetData();
-			int data_length = tit2->GetSize();
 			string data_str = "";
-			for (int i = 3; i < data_length; i++) {
+
+			for (int i = 3, data_length = tit2->GetSize(); i < data_length; i++) {
 				if ((data[i] != 0))	data_str += data[i];
 			}
 			cout << "Title: " << data_str << endl;
 		}
+
+		cout << "test" << endl;
 	}
 }
