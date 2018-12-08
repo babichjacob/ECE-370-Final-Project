@@ -4,14 +4,10 @@
 #include <filesystem>
 #include <fstream>
 #include <iostream>
+
 using namespace std;
 // This is a new feature I need
 namespace filesystem = std::experimental::filesystem;
-
-
-int chars_to_int(char char_in[]) {
-	return (char_in[0] << 24) + (char_in[1] << 16) + (char_in[2] << 8) + (char_in[3] << 0);
-}
 
 
 void mp3_main() {
@@ -19,11 +15,18 @@ void mp3_main() {
 
 	string music_path = "bin/data/Music";
 	filesystem::recursive_directory_iterator music_directory = filesystem::recursive_directory_iterator(music_path);
-	ID3v2::AbstractFrame                          *frame;
+	ID3v2::AbstractFrame *frame;
 
 	// This is a foreach loop (much more modern than for loops)
 	for (auto &path : music_directory) {
-		cout << "mp3_main: Found a file: " << path.path() << endl;
+		if (filesystem::is_directory(path)) {
+			cout << "mp3_main: found a directory -- skipping (but will check its contents)" << endl;
+			continue;
+		}
+		else if (filesystem::is_regular_file(path)) {
+			cout << "mp3_main: found a regular file -- let's see if we can find mp3 information in it";
+		}
+		
 		ID3v2::Tag mp3_tag(path.path().string());
 		ID3v2::AbstractFrame *frame;
 		vector<ID3v2::AbstractFrame *> frames;
@@ -37,13 +40,21 @@ void mp3_main() {
 			
 			const uint8_t *data = tit2->GetData();
 			string data_str = "";
+			int data_length = tit2->GetSize();
 
-			for (int i = 3, data_length = tit2->GetSize(); i < data_length; i++) {
+			int first_alphanumerical_index = -1;
+
+			for (int i = 0; i < data_length; i++) {
+				if (isalnum(data[i])) {
+					first_alphanumerical_index = i;
+					break;
+				}
+			}
+
+			for (int i = first_alphanumerical_index; i < data_length; i++) {
 				if ((data[i] != 0))	data_str += data[i];
 			}
 			cout << "Title: " << data_str << endl;
 		}
-
-		cout << "test" << endl;
 	}
 }
