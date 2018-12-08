@@ -1,8 +1,7 @@
 #pragma once
 
-#include <chrono>
+#include <fstream>
 #include <filesystem>
-#include <thread>
 
 #include "csv.h"
 #include "ID3v2.h"
@@ -18,6 +17,8 @@ namespace filesystem = std::experimental::filesystem;
 class Song
 {
 private:
+	filesystem::path cache_file_path;
+
 	void save_to_cache();
 	void set_from_cache(filesystem::path path);
 	void set_from_file(filesystem::path path);
@@ -31,7 +32,7 @@ public:
 	string track_of_album;
 	int year;
 
-	filesystem::path file_path;
+	filesystem::path music_file_path;
 
 	Song();
 	Song(filesystem::path path);

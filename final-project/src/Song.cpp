@@ -11,6 +11,8 @@ Song::~Song()
 
 
 Song::Song(filesystem::path path) {
+	music_file_path = path;
+
 	try {
 		// Try to save computational power by loading information from the cache
 		set_from_cache(path);
@@ -49,28 +51,62 @@ string get_frame_data_as_string(const uint8_t *data, int data_length) {
 }
 
 
-void Song::save_to_cache() {
+filesystem::path find_cache_file_path(filesystem::path music_file_path) {
 	// Make a copy so we don't mutate the original path
-	filesystem::path music_root_path = filesystem::path(file_path);
+	filesystem::path music_root_path = filesystem::path(music_file_path);
 	filesystem::path cache_file_path = filesystem::path(CACHE_DIR);
 
 	// Safety check: make sure we haven't called parent_path() until there are no parent paths left
 	// (this could happen)
 	while ((music_root_path.parent_path() != filesystem::path("bin/data/music")) && (music_root_path != filesystem::path(""))) {
 		music_root_path = music_root_path.parent_path();
-
 		cache_file_path /= music_root_path.filename();
 	}
 
-	cache_file_path /= file_path.filename().replace_extension("csv");
-	cout << "Cache path: " << cache_file_path.string() << endl;
+	return cache_file_path / music_file_path.filename().replace_extension("csv");
+}
+
+
+void Song::save_to_cache() {
+	cache_file_path = find_cache_file_path(music_file_path);
+
+	filesystem::create_directories(cache_file_path.parent_path());
+	ofstream cache_file(cache_file_path.string());
+
+	cache_file << title << ",";
+	cache_file << album << ",";
+	cache_file << artist << ",";
+	cache_file << genre << ",";
+	cache_file << track_of_album << ",";
+	cache_file << year << endl;
 }
 
 
 void Song::set_from_cache(filesystem::path path) {
-	throw runtime_error("not in cache");
+	cache_file_path = find_cache_file_path(path);
+	
+	string csv_cache_line;
 
-	file_path = path;
+	// There's a race condition here but I'd rather ignore the possibility of that
+	// than do EAFP in C++
+	if (filesystem::exists(cache_file_path)) {
+		ifstream cache_file(cache_file_path.string());
+		
+		// Read from the cache file
+		getline(cache_file, csv_cache_line);
+	}
+	else {
+		throw runtime_error("not in cache");
+	}
+
+	vector<string> parsed_csv = parse_csv_string_to_vector(csv_cache_line);
+
+	title = parsed_csv[0];
+	album = parsed_csv[1];
+	artist = parsed_csv[2];
+	genre = parsed_csv[3];
+	track_of_album = parsed_csv[4];
+	year = stoi(parsed_csv[5]);
 }
 
 
@@ -83,8 +119,6 @@ void Song::set_from_file(filesystem::path path) {
 		cout << "Song::set_from_file: this is not a valid MP3 file -- bye" << endl;
 		throw runtime_error("invalid file -- not MP3");
 	}
-
-	file_path = path;
 
 	// Extract all the useful data (these can't all be turned into their own methods
 	// because that was giving me a null pointer exception)
