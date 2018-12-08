@@ -16,7 +16,7 @@ Song::~Song()
 }
 
 
-string Song::get_frame_data_as_string(const uint8_t *data, int data_length) {
+string get_frame_data_as_string(const uint8_t *data, int data_length) {
 	string data_str = "";
 	int first_alphanumerical_index = -1;
 
@@ -45,12 +45,11 @@ void Song::set_from_file(filesystem::directory_entry path) {
 
 	if (!mp3_tag.IsValid()) {
 		cout << "Song::set_from_file: this is not a valid MP3 file -- bye" << endl;
-		return;
+		throw runtime_error("invalid song");
 	}
 	
-	// Since the constructor will exit from the return statement above if the file is invalid (not an MP3),
+	// Since the constructor will exit from the throw statement above if the file is invalid (not an MP3),
 	// we can continue on the assumption that we're working with a valid file
-
 	is_valid = true;
 
 	// Extract all the useful data (these can't all be turned into their own methods
@@ -66,6 +65,18 @@ void Song::set_from_file(filesystem::directory_entry path) {
 	ID3v2::Frame::v23::TPE1 *tpe1 = dynamic_cast<ID3v2::Frame::v23::TPE1 *>(mp3_tag.GetFrameWithName("TPE1"));
 	if (tpe1 != nullptr) artist = get_frame_data_as_string(tpe1->GetData(), tpe1->GetSize());
 	else artist = "Unknown Artist";
+
+	ID3v2::Frame::v23::TCON *tcon = dynamic_cast<ID3v2::Frame::v23::TCON *>(mp3_tag.GetFrameWithName("TCON"));
+	if (tcon != nullptr) genre = get_frame_data_as_string(tcon->GetData(), tcon->GetSize());
+	else genre = "Unknown Genre";
+
+	ID3v2::Frame::v23::TRCK *trck = dynamic_cast<ID3v2::Frame::v23::TRCK *>(mp3_tag.GetFrameWithName("TRCK"));
+	if (trck != nullptr) track_of_album = get_frame_data_as_string(trck->GetData(), trck->GetSize());
+	else track_of_album = "0/0";
+
+	ID3v2::Frame::v23::TYER *tyer = dynamic_cast<ID3v2::Frame::v23::TYER *>(mp3_tag.GetFrameWithName("TYER"));
+	if (tpe1 != nullptr) year = stoi(get_frame_data_as_string(tyer->GetData(), tyer->GetSize()));
+	else year = 1900;
 }
 
 
@@ -73,9 +84,11 @@ void Song::print() {
 	for (int i = 0; i < 40; i++) cout << "-";
 	cout << endl;
 
-	cout << title << ": " << endl;
+	cout << title << " (" << track_of_album << "): " << endl;
 	cout << "\t Artist: " << artist << endl;
 	cout << "\t Album: "  << album << endl;
+	cout << "\t Genre: "  << genre << endl;
+	cout << "\t Year: "   << year << endl;
 
 	for (int i = 0; i < 40; i++) cout << "-";
 	cout << endl;

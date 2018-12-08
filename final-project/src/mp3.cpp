@@ -3,6 +3,7 @@
 
 #include "Song.h"
 
+#include <exception>
 #include <filesystem>
 #include <fstream>
 #include <iostream>
@@ -26,10 +27,17 @@ void mp3_main() {
 		}
 		else if (filesystem::is_regular_file(path)) {
 			cout << "mp3_main: found a regular file -- let's see if we can find mp3 information in it" << endl;
+			
+			
+			try {
+				Song song(path);
 
-			Song song(path);
-
-			if (song.is_valid) song.print();
+				// The runtime_error thrown in the constructor above will prevent this line from executing
+				song.print();
+			}
+			catch (runtime_error &e) {
+				// Just move on
+			}
 		}
 	}
 }

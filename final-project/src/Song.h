@@ -9,20 +9,23 @@ namespace filesystem = std::experimental::filesystem;
 class Song
 {
 private:
-	string get_frame_data_as_string(const uint8_t *data, int data_length);
+	void set_from_file(filesystem::directory_entry path);
 
 public:
+	// Flag variable -- there's no way to know whether a given file will be valid
+	// until you try to instantiate a Song object from it
 	bool is_valid = false;
 
 	string title;
 	string album;
 	string artist;
+	string genre;
+	string track_of_album;
 	int year;
 
 	Song();
 	Song(filesystem::directory_entry path);
 	~Song();
-	void set_from_file(filesystem::directory_entry path);
 	void print();
 };
 
