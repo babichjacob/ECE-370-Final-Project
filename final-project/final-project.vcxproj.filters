@@ -49,6 +49,7 @@
     <ClCompile Include="src\csv.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\Album.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="src">
@@ -119,6 +120,7 @@
     <ClInclude Include="src\csv.h">
       <Filter>src</Filter>
     </ClInclude>
+    <ClInclude Include="src\Album.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="icon.rc" />
