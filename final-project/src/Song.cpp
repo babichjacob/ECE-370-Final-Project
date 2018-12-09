@@ -10,7 +10,7 @@ Song::~Song()
 }
 
 
-Song::Song(filesystem::path path) {
+Song::Song(fs::path path) {
 	music_file_path = path;
 
 	try {
@@ -51,14 +51,14 @@ string get_frame_data_as_string(const uint8_t *data, int data_length) {
 }
 
 
-filesystem::path find_cache_file_path(filesystem::path music_file_path) {
+fs::path find_cache_file_path(fs::path music_file_path) {
 	// Make a copy so we don't mutate the original path
-	filesystem::path music_root_path = filesystem::path(music_file_path);
-	filesystem::path cache_file_path = filesystem::path(CACHE_DIR);
+	fs::path music_root_path = fs::path(music_file_path);
+	fs::path cache_file_path = fs::path(CACHE_DIR);
 
 	// Safety check: make sure we haven't called parent_path() until there are no parent paths left
 	// (this could happen)
-	while ((music_root_path.parent_path() != filesystem::path("bin/data/music")) && (music_root_path != filesystem::path(""))) {
+	while ((music_root_path.parent_path() != fs::path("bin/data/music")) && (music_root_path != fs::path(""))) {
 		music_root_path = music_root_path.parent_path();
 		cache_file_path /= music_root_path.filename();
 	}
@@ -70,7 +70,7 @@ filesystem::path find_cache_file_path(filesystem::path music_file_path) {
 void Song::save_to_cache() {
 	cache_file_path = find_cache_file_path(music_file_path);
 
-	filesystem::create_directories(cache_file_path.parent_path());
+	fs::create_directories(cache_file_path.parent_path());
 	ofstream cache_file(cache_file_path.string());
 
 	cache_file << title << ",";
@@ -82,14 +82,14 @@ void Song::save_to_cache() {
 }
 
 
-void Song::set_from_cache(filesystem::path path) {
+void Song::set_from_cache(fs::path path) {
 	cache_file_path = find_cache_file_path(path);
 	
 	string csv_cache_line;
 
 	// There's a race condition here but I'd rather ignore the possibility of that
 	// than do EAFP in C++
-	if (filesystem::exists(cache_file_path)) {
+	if (fs::exists(cache_file_path)) {
 		ifstream cache_file(cache_file_path.string());
 		
 		// Read from the cache file
@@ -110,7 +110,7 @@ void Song::set_from_cache(filesystem::path path) {
 }
 
 
-void Song::set_from_file(filesystem::path path) {
+void Song::set_from_file(fs::path path) {
 	cout << "Song::set_from_file: about to set from file " << path.string() << endl;
 
 	ID3v2::Tag mp3_tag(path.string());

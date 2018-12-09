@@ -193,7 +193,6 @@
     <ClCompile Include="..\..\..\addons\ofxThreadedImageLoader\src\ofxThreadedImageLoader.cpp" />
     <ClCompile Include="src\csv.cpp" />
     <ClCompile Include="src\main.cpp" />
-    <ClCompile Include="src\mp3.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
     <ClCompile Include="src\Song.cpp" />
     <ClCompile Include="src\UI.cpp" />
@@ -212,7 +211,6 @@
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxToggle.h" />
     <ClInclude Include="..\..\..\addons\ofxThreadedImageLoader\src\ofxThreadedImageLoader.h" />
     <ClInclude Include="src\csv.h" />
-    <ClInclude Include="src\mp3.h" />
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="src\Song.h" />
     <ClInclude Include="src\UI.h" />
