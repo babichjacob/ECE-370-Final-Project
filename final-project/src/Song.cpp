@@ -56,11 +56,19 @@ fs::path find_cache_file_path(fs::path music_file_path) {
 	fs::path music_root_path = fs::path(music_file_path);
 	fs::path cache_file_path = fs::path(CACHE_DIR);
 
+	vector<fs::path> parents;
+
 	// Safety check: make sure we haven't called parent_path() until there are no parent paths left
 	// (this could happen)
 	while ((music_root_path.parent_path() != fs::path("bin/data/music")) && (music_root_path != fs::path(""))) {
 		music_root_path = music_root_path.parent_path();
-		cache_file_path /= music_root_path.filename();
+		parents.push_back(music_root_path.filename());
+	}
+
+	while (parents.size()) {
+		cache_file_path /= parents.back();
+		// For some reason, pop_back doesn't return the value it pops...
+		parents.pop_back();
 	}
 
 	return cache_file_path / music_file_path.filename().replace_extension("csv");

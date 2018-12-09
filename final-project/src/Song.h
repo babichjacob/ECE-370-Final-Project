@@ -11,6 +11,12 @@ constexpr auto CACHE_DIR = "bin/data/.MyTunes/cache";
 
 namespace fs = std::experimental::filesystem;
 
+using std::cout;
+using std::endl;
+using std::ifstream;
+using std::ofstream;
+using std::runtime_error;
+
 class Song
 {
 private:
