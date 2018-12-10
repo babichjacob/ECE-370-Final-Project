@@ -16,6 +16,7 @@ namespace fs = std::experimental::filesystem;
 #include "Song.h"
 
 
+// deprecation notice -- please use openFrameworks for this (only here in case it becomes necessary to use again)
 void mp3_main() {
 	cout << "mp3_main: Hello!" << endl;
 
@@ -92,15 +93,18 @@ void mp3_main() {
 	}
 
 	// Now examine our artists
-	cout << endl << endl << endl;
+	cout << endl;
 	for (auto &artists_map_entry : artists_map) {
 		for (int i = 0; i < 80; i++) cout << "-";
-		cout << endl << endl;
+		cout << endl;
 		
 		cout << artists_map_entry.second.name << endl;
 		for (auto &album : artists_map_entry.second.albums) {
 			album.print();
 		}
+
+		for (int i = 0; i < 80; i++) cout << "-";
+		cout << endl << endl;
 	}
 }
 
