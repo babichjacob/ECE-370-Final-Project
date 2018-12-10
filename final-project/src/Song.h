@@ -34,6 +34,8 @@ public:
 	// Ex 4/7
 	string track_of_album;
 	int year;
+	// Out of order because this was added after the fact
+	string album_artist;
 
 	fs::path music_file_path;
 

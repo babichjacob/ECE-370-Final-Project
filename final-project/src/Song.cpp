@@ -87,7 +87,8 @@ void Song::save_to_cache() {
 	cache_file << artist << ",";
 	cache_file << genre << ",";
 	cache_file << track_of_album << ",";
-	cache_file << year << endl;
+	cache_file << year << ",";
+	cache_file << album_artist << endl;
 }
 
 
@@ -116,6 +117,8 @@ void Song::set_from_cache(fs::path path) {
 	genre = parsed_csv[3];
 	track_of_album = parsed_csv[4];
 	year = stoi(parsed_csv[5]);
+	// Out of order because this was added after the fact
+	album_artist = parsed_csv[6];
 }
 
 
@@ -139,9 +142,15 @@ void Song::set_from_file(fs::path path) {
 	if (talb != nullptr) album = get_frame_data_as_string(talb->GetData(), talb->GetSize());
 	else album = "Unknown Album";
 
+	// Note that this is track / song artist
 	ID3v2::Frame::v23::TPE1 *tpe1 = dynamic_cast<ID3v2::Frame::v23::TPE1 *>(mp3_tag.GetFrameWithName("TPE1"));
 	if (tpe1 != nullptr) artist = get_frame_data_as_string(tpe1->GetData(), tpe1->GetSize());
 	else artist = "Unknown Artist";
+
+	// Note that this is album artist
+	ID3v2::Frame::v23::TPE2 *tpe2 = dynamic_cast<ID3v2::Frame::v23::TPE2 *>(mp3_tag.GetFrameWithName("TPE2"));
+	if (tpe2 != nullptr) album_artist = get_frame_data_as_string(tpe2->GetData(), tpe2->GetSize());
+	else album_artist = "Unknown Artist";
 
 	ID3v2::Frame::v23::TCON *tcon = dynamic_cast<ID3v2::Frame::v23::TCON *>(mp3_tag.GetFrameWithName("TCON"));
 	if (tcon != nullptr) genre = get_frame_data_as_string(tcon->GetData(), tcon->GetSize());

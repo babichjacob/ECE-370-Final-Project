@@ -29,7 +29,7 @@ void Album::inherit_metadata() {
 		}
 
 		// Copy the artist from the song (they should all be in agreement)
-		artist = song.artist;
+		artist = song.album_artist;
 	}
 }
 
