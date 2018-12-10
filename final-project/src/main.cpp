@@ -39,26 +39,22 @@ void mp3_main() {
 				// The runtime_error thrown in the constructor above will prevent every line from here on from executing
 				// song.print();
 
-				// Pretend this declaration statement isn't here (it interferes with the explanations below)
-				Album *this_album;
-
 				// Find a pre-existing album
 				if (albums_map.count(song.album) > 0) {
 					unordered_map<string, Album>::iterator map_entry = albums_map.find(song.album);
+					Album *this_album = &map_entry->second;
 					// Add this song to the album
-					this_album = &map_entry->second;
+					this_album->songs.push_back(song);
 				}
 				// Or make one if necessary
 				else {
 					Album new_album(song.album);
-					this_album = &new_album;
-					// Add this song to the album
+					// Add this song to the album (has to be done before adding it to the map)
+					new_album.songs.push_back(song);
 					pair<string, Album> map_entry(song.album, new_album);
 					albums_map.insert(map_entry);
 				}
 
-				// Add this song to the album
-				this_album->songs.push_back(song);
 			}
 			catch (runtime_error &e) {
 				// Just move on
@@ -70,11 +66,11 @@ void mp3_main() {
 	// Let's examine our library now that the directories have been completely iterated over
 	cout << endl << endl;
 	for (auto &map_entry : albums_map) {
-		cout << map_entry.first << " [";
-		for (int i = 0, n = map_entry.second.songs.size(); i < n; i++) {
-			cout << map_entry.second.songs[i].title << " ";
-		}
-		cout << "]" << endl << endl;
+		// Load the metadata (genre and year for now) from the album's songs into the album itself
+		map_entry.second.inherit_metadata();
+
+		// Print it out (pre-cursor to being part of the UI for now)
+		map_entry.second.print();
 	}
 }
 
