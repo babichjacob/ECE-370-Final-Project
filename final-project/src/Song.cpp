@@ -66,6 +66,7 @@ fs::path find_cache_file_path(fs::path music_file_path) {
 	}
 
 	while (parents.size()) {
+		// The / operator adds on a subfolder to the path
 		cache_file_path /= parents.back();
 		// For some reason, pop_back doesn't return the value it pops...
 		parents.pop_back();
