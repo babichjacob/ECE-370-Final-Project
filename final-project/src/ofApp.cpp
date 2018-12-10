@@ -13,6 +13,22 @@ void ofApp::setup(){
 //--------------------------------------------------------------
 void ofApp::update(){
 	ui.update();
+
+	// Spread loading across 3 frames (so we could potentially display a loading animation alongside)
+	switch (ofGetFrameNum()) {
+	case 1:
+		all_songs = find_all_songs();
+		break;
+	case 2:
+		albums_map = build_albums(all_songs);
+		break;
+	case 3:
+		artists_map = build_artists(albums_map);
+		break;
+	case 4:
+		ui.frame_loaded = ofGetFrameNum();
+		break;
+	}
 }
 
 //--------------------------------------------------------------

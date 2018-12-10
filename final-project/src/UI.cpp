@@ -28,6 +28,21 @@ void UI::update() {
 }
 
 void UI::draw() {
-	ofSetColor(ofColor::silver);
-	ofDrawRectangle(menu_bar);
+	// Don't draw a UI until the songs are loaded in
+	if (frame_loaded == -1) return;
+
+	// Dummy: pretend the UI is this blue rectangle
+	ofSetColor(ofColor::blue);
+	ofDrawRectangle(ofGetWidth() / 4, ofGetHeight() / 4, ofGetWidth() / 2, ofGetHeight() / 2);
+
+	int transition_duration_frames = 90;
+	
+	if (ofGetFrameNum() - frame_loaded < transition_duration_frames) {
+		float opacity = 1 - ((float) (ofGetFrameNum() - frame_loaded)) / (float) transition_duration_frames;
+
+		float opacity_mapped = 1-pow(1-opacity, 3);
+
+		ofSetColor(ofColor::white, (int) (255*opacity_mapped));
+		ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+	}
 }

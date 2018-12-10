@@ -1,10 +1,14 @@
+#pragma once
+
 #include "ofMain.h"
 
-#pragma once
+using std::max;
 
 class UI
 {
 public:
+	int frame_loaded = -1;
+
 	UI();
 	~UI();
 	void setup();

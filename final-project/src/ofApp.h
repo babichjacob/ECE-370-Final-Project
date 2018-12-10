@@ -1,10 +1,18 @@
 #pragma once
 
+#include "Album.h"
+#include "Artist.h"
+#include "library.h"
 #include "ofMain.h"
+#include "Song.h"
 #include "UI.h"
 
 class ofApp : public ofBaseApp{
 	UI ui;
+
+	vector<Song> all_songs;
+	unordered_map<string, Album> albums_map;
+	unordered_map<string, Artist> artists_map;
 
 	public:
 		void setup();

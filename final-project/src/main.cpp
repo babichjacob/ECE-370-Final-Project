@@ -11,12 +11,10 @@
 int main( ){
 	cout << "main: begin program" << endl;
 
-	cout << "main: testing - switching to mp3_main now" << endl;
-
-	mp3_main();
-
-	cout << "main: testing - mp3_main exited and the program will too now" << endl;
-	return EXIT_SUCCESS;
+	//cout << "main: testing - switching to mp3_main now" << endl;
+	//mp3_main();
+	//cout << "main: testing - mp3_main exited and the program will too now" << endl;
+	//return EXIT_SUCCESS;
 
 	// Default, dummy size. Replaced two lines below.
 	ofSetupOpenGL(1280,720,OF_WINDOW);			// <-------- setup the GL context
