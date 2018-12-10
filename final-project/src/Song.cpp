@@ -123,12 +123,9 @@ void Song::set_from_cache(fs::path path) {
 
 
 void Song::set_from_file(fs::path path) {
-	cout << "Song::set_from_file: about to set from file " << path.string() << endl;
-
 	ID3v2::Tag mp3_tag(path.string());
 
 	if (!mp3_tag.IsValid()) {
-		cout << "Song::set_from_file: this is not a valid MP3 file -- bye" << endl;
 		throw runtime_error("invalid file -- not MP3");
 	}
 
