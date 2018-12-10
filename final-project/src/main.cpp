@@ -40,24 +40,24 @@ void mp3_main() {
 				// song.print();
 
 				// Pretend this declaration statement isn't here (it interferes with the explanations below)
-				Album this_album(song.album);
+				Album *this_album;
 
 				// Find a pre-existing album
 				if (albums_map.count(song.album) > 0) {
-					unordered_map<string, Album>::const_iterator map_entry = albums_map.find(song.album);
-					Album this_album = map_entry->second;
+					unordered_map<string, Album>::iterator map_entry = albums_map.find(song.album);
+					// Add this song to the album
+					this_album = &map_entry->second;
 				}
 				// Or make one if necessary
 				else {
-					// Pretend that `this_album`'s declaration is right here
-					pair<string, Album> map_entry(song.album, this_album);
+					Album new_album(song.album);
+					this_album = &new_album;
+					// Add this song to the album
+					pair<string, Album> map_entry(song.album, new_album);
 					albums_map.insert(map_entry);
 				}
-
-				// Add this song to the album
-				this_album.songs.push_back(song);
 				
-				cout << "adding " << song.title << " to " << this_album.name << endl;
+				this_album->songs.push_back(song);
 			}
 			catch (runtime_error &e) {
 				// Just move on

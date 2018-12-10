@@ -1,5 +1,8 @@
 #include "Song.h"
 
+using std::cout;
+using std::endl;
+
 class Album
 {
 public:
