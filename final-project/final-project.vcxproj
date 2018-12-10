@@ -194,6 +194,7 @@
     <ClCompile Include="src\Album.cpp" />
     <ClCompile Include="src\Artist.cpp" />
     <ClCompile Include="src\csv.cpp" />
+    <ClCompile Include="src\library.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
     <ClCompile Include="src\Song.cpp" />
@@ -215,6 +216,7 @@
     <ClInclude Include="src\Album.h" />
     <ClInclude Include="src\Artist.h" />
     <ClInclude Include="src\csv.h" />
+    <ClInclude Include="src\library.h" />
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="src\Song.h" />
     <ClInclude Include="src\UI.h" />
