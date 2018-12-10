@@ -1,28 +1,13 @@
 #include "Album.h"
 
 
-
-Album::Album()
-{
-}
-
-
 Album::~Album()
 {
-	cout << "a new album object was made without args" << endl;
 }
 
 
 Album::Album(string name) {
 	this->name = name;
-
-	// Give it an absurdly high value to guarantee the year of any song will be able to
-	// overcome it
-	year_range.first = 999999;
-	// Same reason as before, but low value
-	year_range.second = 0;
-
-	cout << "a new album object was made with args" << endl;
 }
 
 

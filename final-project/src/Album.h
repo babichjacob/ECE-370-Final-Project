@@ -13,9 +13,10 @@ public:
 
 	// Inherited metadata (from the songs in the album)
 	vector<string> genres;
-	pair<int, int> year_range;
+	// Give the lower bound an absurdly high value to guarantee the year of any song will be able to
+	// overcome it, and the higher bound an absurdly low value for the same reason
+	pair<int, int> year_range = { 999999, 0 };
 
-	Album();
 	~Album();
 	Album(string name);
 	void inherit_metadata();
