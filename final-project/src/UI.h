@@ -4,10 +4,14 @@
 
 using std::max;
 
+
 class UI
 {
 public:
 	int frame_loaded = -1;
+
+	// How long the fade-in animation will last
+	int transition_duration_frames = 60;
 
 	UI();
 	~UI();
@@ -16,6 +20,12 @@ public:
 	void draw();
 
 private:
+	ofColor cool_gray_lightest;
+	ofColor cool_gray_lighter;
+	ofColor cool_gray_light;
+	ofColor cool_gray;
+	ofColor cool_gray_darker;
+
 	ofTrueTypeFont font_small;
 	int font_small_size = 9;
 
@@ -25,9 +35,10 @@ private:
 	ofTrueTypeFont font_large;
 	int font_large_size = 18;
 
-	ofRectangle menu_bar;
+	ofRectangle play_zone;
 
-	int num_menu_bar_top_level_entries = 4;
-	string menu_bar_top_level_entries[4] = { "File", "Edit", "View", "About" };
+	ofRectangle columns;
+	vector<string> columns_entries = {"Song Name", "Album", "Artist", "Genre", "Year"};
+	vector<int> columns_edges = {0, 500, 800, 1100, 1400};
 };
 

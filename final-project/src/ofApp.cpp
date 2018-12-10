@@ -4,6 +4,7 @@
 void ofApp::setup(){
 	ofSetBackgroundColor(ofColor::white);
 	ofSetFrameRate(60);
+	ofSetBackgroundAuto(false);
 
 	srand(time(NULL));
 
