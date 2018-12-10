@@ -56,7 +56,8 @@ void mp3_main() {
 					pair<string, Album> map_entry(song.album, new_album);
 					albums_map.insert(map_entry);
 				}
-				
+
+				// Add this song to the album
 				this_album->songs.push_back(song);
 			}
 			catch (runtime_error &e) {
