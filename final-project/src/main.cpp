@@ -21,6 +21,7 @@ void mp3_main() {
 	fs::recursive_directory_iterator music_directory = fs::recursive_directory_iterator(MUSIC_DIR);
 
 	unordered_map<string, Album> albums_map;
+	vector<Song> all_songs;
 
 
 	// This is a foreach loop (much more modern than for loops)
@@ -37,6 +38,7 @@ void mp3_main() {
 				Song song(path.path());
 
 				// The runtime_error thrown in the constructor above will prevent every line from here on from executing
+				all_songs.push_back(song);
 				// song.print();
 
 				// Find a pre-existing album
@@ -54,7 +56,6 @@ void mp3_main() {
 					pair<string, Album> map_entry(song.album, new_album);
 					albums_map.insert(map_entry);
 				}
-
 			}
 			catch (runtime_error &e) {
 				// Just move on
