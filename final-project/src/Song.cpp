@@ -60,7 +60,7 @@ fs::path find_cache_file_path(fs::path music_file_path) {
 
 	// Safety check: make sure we haven't called parent_path() until there are no parent paths left
 	// (this could happen)
-	while ((music_root_path.parent_path() != fs::path("bin/data/music")) && (music_root_path != fs::path(""))) {
+	while ((music_root_path.parent_path() != fs::path(MUSIC_DIR)) && (music_root_path != fs::path(""))) {
 		music_root_path = music_root_path.parent_path();
 		parents.push_back(music_root_path.filename());
 	}
