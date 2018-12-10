@@ -8,6 +8,7 @@ using std::endl;
 
 namespace fs = std::experimental::filesystem;
 
+#include "Artist.h"
 #include "Album.h"
 #include "ofMain.h"
 #include "ofApp.h"
@@ -20,6 +21,7 @@ void mp3_main() {
 
 	fs::recursive_directory_iterator music_directory = fs::recursive_directory_iterator(MUSIC_DIR);
 
+	unordered_map<string, Artist> artists_map;
 	unordered_map<string, Album> albums_map;
 	vector<Song> all_songs;
 
@@ -66,12 +68,39 @@ void mp3_main() {
 
 	// Let's examine our library now that the directories have been completely iterated over
 	cout << endl << endl;
-	for (auto &map_entry : albums_map) {
+	for (auto &albums_map_entry : albums_map) {
 		// Load the metadata (genre and year for now) from the album's songs into the album itself
-		map_entry.second.inherit_metadata();
+		albums_map_entry.second.inherit_metadata();
 
-		// Print it out (pre-cursor to being part of the UI for now)
-		map_entry.second.print();
+		string artist_name = albums_map_entry.second.artist;
+
+		// Find a pre-existing artist
+		if (artists_map.count(artist_name) > 0) {
+			unordered_map<string, Artist>::iterator artists_map_entry = artists_map.find(artist_name);
+			Artist *this_artist = &artists_map_entry->second;
+			// Add this album to the artist
+			this_artist->albums.push_back(albums_map_entry.second);
+		}
+		// Or make one if necessary
+		else {
+			Artist new_artist(artist_name);
+			// Add this song to the album (has to be done before adding it to the map)
+			new_artist.albums.push_back(albums_map_entry.second);
+			pair<string, Artist> artists_map_entry(artist_name, new_artist);
+			artists_map.insert(artists_map_entry);
+		}
+	}
+
+	// Now examine our artists
+	cout << endl << endl << endl;
+	for (auto &artists_map_entry : artists_map) {
+		for (int i = 0; i < 80; i++) cout << "-";
+		cout << endl << endl;
+		
+		cout << artists_map_entry.second.name << endl;
+		for (auto &album : artists_map_entry.second.albums) {
+			album.print();
+		}
 	}
 }
 
@@ -84,7 +113,7 @@ int main( ){
 	mp3_main();
 
 	cout << "main: testing - mp3_main exited and the program will too now" << endl;
-	return 0;
+	return EXIT_SUCCESS;
 
 	// Default, dummy size. Replaced two lines below.
 	ofSetupOpenGL(1280,720,OF_WINDOW);			// <-------- setup the GL context

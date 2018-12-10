@@ -27,6 +27,9 @@ void Album::inherit_metadata() {
 		if (year_range.second < song.year) {
 			year_range.second = song.year;
 		}
+
+		// Copy the artist from the song (they should all be in agreement)
+		artist = song.artist;
 	}
 }
 
