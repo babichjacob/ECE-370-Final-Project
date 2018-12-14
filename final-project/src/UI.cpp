@@ -213,7 +213,7 @@ void UI::draw_song_view() {
 
 		// Write out song info (text)
 		ofSetColor(cool_gray_darkest);
-		font_medium.drawString(this_song.title,             columns_edges[0] + font_medium_size, this_song_origin_y + font_medium_size + padding_song_entry);
+		font_medium.drawString(this_song.title,             columns_edges[0] + font_medium_size, this_song_origin_y + font_medium_size  + padding_song_entry);
 		font_medium.drawString(this_song.album,             columns_edges[1] + font_medium_size, this_song_origin_y + font_medium_size + padding_song_entry);
 		font_medium.drawString(this_song.artist,            columns_edges[2] + font_medium_size, this_song_origin_y + font_medium_size + padding_song_entry);
 		font_medium.drawString(this_song.genre,             columns_edges[3] + font_medium_size, this_song_origin_y + font_medium_size + padding_song_entry);
