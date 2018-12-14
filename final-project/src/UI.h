@@ -1,10 +1,28 @@
 #pragma once
 
+#include <filesystem>
+
 #include "ofMain.h"
 #include "Song.h"
 
+constexpr auto ICONS_DIR = "bin/data/.MyTunes/icons";
+
+namespace fs = std::experimental::filesystem;
+
+using std::map;
 using std::max;
 using std::min;
+
+
+// An icon set is an ofImage and other stuff relating to it
+struct IconBundle {
+	ofImage icon;
+	ofRectangle hitbox;
+	ofColor color_inactive;
+	ofColor color_active;
+};
+
+typedef struct IconBundle IconBundle;
 
 
 class UI
@@ -26,7 +44,7 @@ public:
 	void draw_song_view(vector<Song> all_songs);
 
 private:
-	// Colors
+	// Color palette
 	ofColor cool_gray_lightest;
 	ofColor cool_gray_lighter;
 	ofColor cool_gray_light;
@@ -34,7 +52,7 @@ private:
 	ofColor cool_gray_darker;
 	ofColor cool_gray_darkest;
 	ofColor cool_black;
-	// End colors
+	// End color palette
 
 	// Fonts
 	ofTrueTypeFont font_small;
@@ -54,15 +72,8 @@ private:
 	ofRectangle currently_playing_zone;
 
 	// Icons
-	ofImage previous_song_icon;
-	ofImage next_song_icon;
+	map<string, IconBundle> icons;
 
-	ofImage rewind_icon;
-	ofImage forward_icon;
-
-	ofImage play_icon;
-	ofImage pause_icon;
-	// End icons
 
 	ofImage currently_playing_song_image;
 
@@ -72,4 +83,5 @@ private:
 };
 
 
+string get_icon_path(string icon_name);
 int get_icon_baseline(ofRectangle play_zone, ofImage icon);
