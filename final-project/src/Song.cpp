@@ -31,20 +31,14 @@ Song::Song(fs::path path) {
 
 string get_frame_data_as_string(const uint8_t *data, int data_length) {
 	string data_str = "";
-	int first_printable_index = -1;
 
-	// Hunt down the first index of a "printable" character (because everything before it will be garbage)
+	// Hunt down the printable characters
+	// This is because the ID3v2 spec uses something weird call a "synch-safe integer"
+	// so there are usually 0s between the values we need (and a few bytes of garbage before that)
 	for (int i = 0; i < data_length; i++) {
 		if (isprint(data[i])) {
-			first_printable_index = i;
-			break;
+			data_str += data[i];
 		}
-	}
-
-	// Then add all the characters after it to the string
-	// (it occurred to me to use a substr method but I don't think that'll work because this isn't really a string or char array)
-	for (int i = first_printable_index; i < data_length; i++) {
-		if ((data[i] != 0))	data_str += data[i];
 	}
 
 	return data_str;
