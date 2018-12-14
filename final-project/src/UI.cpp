@@ -202,18 +202,22 @@ void UI::draw_album_view() {
 
 
 void UI::draw_song_view() {
-	for (int i = top_song_in_list, n = min(top_song_in_list + songs_that_can_fit_on_screen, (signed int) (all_songs->size()-1)); i < n; i++) {
+	for (int i = top_song_in_list, n = all_songs->size(); i < n; i++) {
 		Song this_song = (*all_songs)[i];
 		
 		int this_song_origin_y = view_space.y + song_entry_height * (i - top_song_in_list);
 		
 		// Zebra striping
-		i % 2 == 0 ? ofSetColor(ofColor::white) : ofSetColor(cool_gray_lightest);
+		ofSetColor(i % 2 == 0 ? ofColor::white : cool_gray_lightest);
 		ofDrawRectangle(0, this_song_origin_y, ofGetWidth(), song_entry_height);
 
 		// Write out song info (text)
 		ofSetColor(cool_gray_darkest);
-		font_medium.drawString(this_song.title, columns_edges[0] + font_medium_size, this_song_origin_y + font_medium_size  + padding_song_entry);
+		font_medium.drawString(this_song.title,             columns_edges[0] + font_medium_size, this_song_origin_y + font_medium_size + padding_song_entry);
+		font_medium.drawString(this_song.album,             columns_edges[1] + font_medium_size, this_song_origin_y + font_medium_size + padding_song_entry);
+		font_medium.drawString(this_song.artist,            columns_edges[2] + font_medium_size, this_song_origin_y + font_medium_size + padding_song_entry);
+		font_medium.drawString(this_song.genre,             columns_edges[3] + font_medium_size, this_song_origin_y + font_medium_size + padding_song_entry);
+		font_medium.drawString(to_string(this_song.year),   columns_edges[4] + font_medium_size, this_song_origin_y + font_medium_size + padding_song_entry);
 	}
 }
 
@@ -221,14 +225,14 @@ void UI::draw_song_view() {
 void UI::scroll_up() {
 	top_song_in_list -= songs_to_scroll;
 	// Ensure scrolling cannot go past the first song
-	if (top_song_in_list < 0) top_song_in_list = 0;
+	top_song_in_list = max(top_song_in_list, 0);
 }
 
 
 void UI::scroll_down() {
 	top_song_in_list += songs_to_scroll;
 	// Ensure scrolling cannot go past the last song
-	if (top_song_in_list >= all_songs->size() - songs_that_can_fit_on_screen) top_song_in_list = all_songs->size() - songs_that_can_fit_on_screen;
+	top_song_in_list = min((unsigned int) top_song_in_list, all_songs->size() - songs_that_can_fit_on_screen + 1);
 }
 
 
