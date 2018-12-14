@@ -12,7 +12,7 @@ class ofApp : public ofBaseApp{
 
 	vector<Song> all_songs;
 	unordered_map<string, Album> albums_map;
-	unordered_map<string, Artist> artists_map;
+	map<string, Artist> artists_map;
 
 	public:
 		void setup();

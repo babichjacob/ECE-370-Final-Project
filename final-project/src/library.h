@@ -2,6 +2,7 @@
 
 #include <filesystem>
 #include <iostream>
+#include <map>
 #include <string>
 #include <unordered_map>
 
@@ -11,11 +12,12 @@
 
 using std::cout;
 using std::endl;
+using std::map;
 using std::unordered_map;
 
 namespace fs = std::experimental::filesystem;
 
 vector<Song> find_all_songs();
 unordered_map<string, Album> build_albums(vector<Song> songs);
-unordered_map<string, Artist> build_artists(unordered_map<string, Album> albums);
+map<string, Artist> build_artists(unordered_map<string, Album> albums);
 void mp3_main();
