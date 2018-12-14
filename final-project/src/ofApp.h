@@ -11,9 +11,9 @@
 class ofApp : public ofBaseApp{
 	UI ui;
 
-	vector<Song> all_songs;
-	map<string, Album> albums_map;
-	map<string, Artist> artists_map;
+	Songs all_songs;
+	Albums albums_map;
+	Artists artists_map;
 
 	public:
 		void setup();

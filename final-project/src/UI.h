@@ -39,9 +39,9 @@ public:
 	// See enum above
 	ViewMode view_mode;
 
-	map<string, Artist> *artists_map;
-	map<string, Album> *albums_map;
-	vector<Song> *all_songs;
+	Artists *artists_map;
+	Albums *albums_map;
+	Songs *all_songs;
 
 	UI();
 	~UI();
@@ -113,7 +113,7 @@ private:
 
 	ofRectangle columns;
 	vector<string> columns_entries = {"Song Name", "Album", "Artist", "Genre", "Year"};
-	vector<int> columns_edges = {0, 500, 800, 1100, 1400};
+	vector<int> columns_edges = {0, 550, 950, 1350, 1600};
 	int columns_border_size = 2;
 
 

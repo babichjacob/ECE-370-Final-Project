@@ -17,7 +17,11 @@ using std::unordered_map;
 
 namespace fs = std::experimental::filesystem;
 
-vector<Song> find_all_songs();
-map<string, Album> build_albums(vector<Song> songs);
-map<string, Artist> build_artists(map<string, Album> albums);
+
+Songs find_all_songs();
+Albums build_albums(Songs songs);
+Artists build_artists(Albums albums);
+
+Songs rebuild_songs(Songs songs);
+
 void mp3_main();

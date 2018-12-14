@@ -1,10 +1,15 @@
 #pragma once
 
+#include <map>
+#include <string>
+#include <vector>
+
 #include "Album.h"
 
-#include <string>
 
+using std::map;
 using std::string;
+using std::vector;
 
 
 class Artist
@@ -17,3 +22,5 @@ public:
 	~Artist();
 };
 
+
+typedef map<string, Artist> Artists;

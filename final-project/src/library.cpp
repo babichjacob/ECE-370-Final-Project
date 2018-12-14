@@ -1,8 +1,9 @@
 #include "library.h"
 
-vector<Song> find_all_songs() {
+
+Songs find_all_songs() {
 	fs::recursive_directory_iterator music_directory = fs::recursive_directory_iterator(MUSIC_DIR);
-	vector<Song> all_songs;
+	Songs all_songs;
 	
 	// This is a foreach loop (much more modern than for loops)
 	for (auto &path : music_directory) {
@@ -32,13 +33,13 @@ vector<Song> find_all_songs() {
 }
 
 
-map<string, Album> build_albums(vector<Song> songs) {
-	map<string, Album> albums_map;
+Albums build_albums(Songs songs) {
+	Albums albums_map;
 
 	for (auto &song : songs) {
 		// Find a pre-existing album
 		if (albums_map.count(song.album) > 0) {
-			map<string, Album>::iterator map_entry = albums_map.find(song.album);
+			Albums::iterator map_entry = albums_map.find(song.album);
 			Album *this_album = &map_entry->second;
 			// Add this song to the album
 			this_album->songs.push_back(song);
@@ -56,8 +57,8 @@ map<string, Album> build_albums(vector<Song> songs) {
 	return albums_map;
 }
 
-map<string, Artist> build_artists(map<string, Album> albums) {
-	map<string, Artist> artists_map;
+Artists build_artists(Albums albums) {
+	Artists artists_map;
 
 	for (auto &albums_map_entry : albums) {
 		// Load the metadata (genre and year for now) from the album's songs into the album itself
@@ -67,7 +68,7 @@ map<string, Artist> build_artists(map<string, Album> albums) {
 
 		// Find a pre-existing artist
 		if (artists_map.count(artist_name) > 0) {
-			map<string, Artist>::iterator artists_map_entry = artists_map.find(artist_name);
+			Artists::iterator artists_map_entry = artists_map.find(artist_name);
 			Artist *this_artist = &artists_map_entry->second;
 			// Add this album to the artist
 			this_artist->albums.push_back(albums_map_entry.second);
@@ -86,11 +87,36 @@ map<string, Artist> build_artists(map<string, Album> albums) {
 }
 
 
+Songs rebuild_songs(Artists artists_map) {
+	// Create a new vector of songs sorted by artist, then by album
+	// (though this should be the case by default for a well-maintained library,
+	//  not every library is well-maintained)
+	Songs sorted_songs;
+	int number_of_songs = 0;
+
+	// For every artist,
+	for (auto &artists_map_entry : artists_map) {
+		// For each of their albums,
+		for (auto &album : artists_map_entry.second.albums) {
+			// Add to the number of songs
+			// todo: it might just make the most sense to just push_back here...
+			// (provided the album's songs have been sorted)
+			number_of_songs += album.songs.size();
+		}
+	}
+
+	// Open up enough space for the number of songs we already have
+	sorted_songs.reserve(number_of_songs);
+
+	return sorted_songs;
+}
+
+
 // deprecation notice -- please use openFrameworks for this (only here in case it becomes necessary to use again)
 void mp3_main() {
 	cout << "mp3_main: Hello!" << endl;
 
-	vector<Song> all_songs = find_all_songs();
+	Songs all_songs = find_all_songs();
 	map<string, Album> albums_map = build_albums(all_songs);
 	map<string, Artist> artists_map = build_artists(albums_map);
 

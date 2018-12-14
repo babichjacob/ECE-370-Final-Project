@@ -45,3 +45,4 @@ public:
 	void print();
 };
 
+typedef vector<Song> Songs;

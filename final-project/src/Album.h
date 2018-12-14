@@ -1,17 +1,21 @@
 #pragma once
 
+#include <map>
+#include <string>
+
 #include "Song.h"
 
 using std::count;
 using std::cout;
 using std::endl;
+using std::map;
 using std::pair;
 
 class Album
 {
 public:
 	string name;
-	vector<Song> songs;
+	Songs songs;
 
 	// Inherited metadata (from the songs in the album)
 	string artist;
@@ -25,3 +29,6 @@ public:
 	void inherit_metadata();
 	void print();
 };
+
+
+typedef map<string, Album> Albums;
