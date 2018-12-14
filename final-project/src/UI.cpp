@@ -11,16 +11,6 @@ UI::~UI()
 }
 
 void UI::setup() {
-	cout << "UI::setup: " << "(starting up)" << "about to set up colors" << endl;
-	cool_gray_lightest = ofColor(248, 250, 252);
-	cool_gray_lighter = ofColor(241, 245, 248);
-	cool_gray_light = ofColor(218, 225, 231);
-	cool_gray = ofColor(184, 194, 204);
-	cool_gray_darker = ofColor(96, 111, 123);
-	cool_gray_darkest = ofColor(61, 72, 82);
-	cool_black = ofColor(34, 41, 47);
-	cout << "UI::setup: " << "done setting up colors" << endl;
-
 	cout << "UI::setup: " << "about to load fonts" << endl;
 	font_small.load(".MyTunes/fonts/Heebo/Heebo-Regular.ttf", font_small_size);
 	font_medium.load(".MyTunes/fonts/Heebo/Heebo-Light.ttf", font_medium_size);
@@ -28,16 +18,6 @@ void UI::setup() {
 	cout << "UI::setup: " << "done loading fonts" << endl;
 
 	cout << "UI::setup: " << "about to load icons" << endl;
-	// The name of each icon (also corresponds to a file in the `.MyTunes/icons` folder)
-	vector<string> icon_names = { "previous", "backward", "play", "pause", "forward", "next" };
-	// These are eyeballed values (it's an aesthetics thing)
-	vector <int> hitboxes_top_left_x = { 60, 118, 184, 184, 240, 298 };
-	// Colors when there is nothing being done to the icon
-	// Note: since play / pause is the primary action, it is emphasized by being slightly darker
-	// Note: all the images are white colored in their file so that they can be tinted here
-	vector<ofColor> icon_colors_inactive = { cool_gray_darker, cool_gray_darker, cool_gray_darkest, cool_gray_darkest, cool_gray_darker, cool_gray_darker };
-	// Colors when the icon is being clicked on (aka within the range of the hitbox -- the whole point of creating such a thing)
-	vector<ofColor> icon_colors_active = { cool_gray_darkest, cool_gray_darkest, cool_black, cool_black, cool_gray_darkest, cool_gray_darkest };
 
 	// Create IconBundles for all the icons we need
 	for (int i = 0; i < icon_names.size(); i++) {
@@ -65,12 +45,13 @@ void UI::setup() {
 	}
 	cout << "UI::setup: " << "icons loaded" << endl;
 
-
-	cout << "UI::setup: " << "fonts loaded" << endl;
+	// Song view by default
+	view_mode = view_song;
 
 	// dummy
 	currently_playing_song_image.load(".MyTunes/icons/image.png");
 
+	// All constant values in UI elements
 	play_zone.x = 0;
 	play_zone.y = 0;
 	play_zone.height = 125;
@@ -83,9 +64,11 @@ void UI::setup() {
 	columns.x = 0;
 	columns.y = play_zone.y+play_zone.height;
 	columns.height = 30;
+
+	view_space.x = 0;
 }
 
-void UI::update() {
+void UI::windowResized() {
 	play_zone.width = ofGetWidth();
 	
 	// Make the currently play zone take up the middle half of the screen
@@ -94,6 +77,12 @@ void UI::update() {
 	currently_playing_zone.x = ofGetWidth() < 1700 ? 400 : ofGetWidth() / 2 - currently_playing_zone.width / 2;
 
 	columns.width = ofGetWidth();
+
+	view_space.y = columns.y + columns.height + columns_border_size;
+	view_space.height = ofGetHeight() - view_space.y;
+	view_space.width = ofGetWidth();
+
+	songs_that_can_fit_on_screen = view_space.height / song_entry_height;
 }
 
 void UI::draw() {
@@ -162,8 +151,12 @@ void UI::draw() {
 	// Draw the column edges (separator)
 	ofSetColor(cool_gray_lighter);
 	for (auto &column_edge : columns_edges) {
-		if (column_edge != 0) ofDrawRectangle(column_edge, columns.y, 2, columns.height);
+		if (column_edge != 0) ofDrawRectangle(column_edge, columns.y, columns_border_size, columns.height);
 	}
+
+	// Draw a bottom border on the columns header
+	ofSetColor(cool_gray_lighter);
+	ofDrawRectangle(columns.x, columns.y + columns.height, columns.width, columns_border_size);
 	
 	// Draw text on top of the columns header
 	ofSetColor(cool_gray_darker);
@@ -171,16 +164,71 @@ void UI::draw() {
 		font_medium.drawString(columns_entries[i], columns_edges[i] + font_medium_size, columns.y + columns.height/2.0 + font_medium_size/2.0);
 	}
 
-	// Do the fade-in animation
+	// Draw the view mode that matches view_mode
+	switch (view_mode) {
+	case view_song:
+		draw_song_view();
+		break;
+	case view_album:
+		draw_album_view();
+		break;
+	case view_artist:
+		draw_artist_view();
+		break;
+	}
+
+	// Do the fade-in animation when necessary
 	if (ofGetFrameNum() - frame_loaded < transition_duration_frames) {
 		// Opacity as a function of frames elapsed
 		float opacity = 1 - ((float) (ofGetFrameNum() - frame_loaded)) / (float) transition_duration_frames;
 		float opacity_mapped = 1-pow(1-opacity,5);
 
-		// Cover the whole screen the same as the background color
+		// Cover the whole screen the same as the background color (white)
 		ofSetColor(ofGetBackgroundColor(), (int) (255*opacity_mapped));
 		ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
 	}
+}
+
+
+
+void UI::draw_artist_view() {
+	// todo
+}
+
+
+void UI::draw_album_view() {
+	// todo
+}
+
+
+void UI::draw_song_view() {
+	for (int i = top_song_in_list, n = min(top_song_in_list + songs_that_can_fit_on_screen, (signed int) (all_songs->size()-1)); i < n; i++) {
+		Song this_song = (*all_songs)[i];
+		
+		int this_song_origin_y = view_space.y + song_entry_height * (i - top_song_in_list);
+		
+		// Zebra striping
+		i % 2 == 0 ? ofSetColor(ofColor::white) : ofSetColor(cool_gray_lightest);
+		ofDrawRectangle(0, this_song_origin_y, ofGetWidth(), song_entry_height);
+
+		// Write out song info (text)
+		ofSetColor(cool_gray_darkest);
+		font_medium.drawString(this_song.title, columns_edges[0] + font_medium_size, this_song_origin_y + font_medium_size  + padding_song_entry);
+	}
+}
+
+
+void UI::scroll_up() {
+	top_song_in_list -= songs_to_scroll;
+	// Ensure scrolling cannot go past the first song
+	if (top_song_in_list < 0) top_song_in_list = 0;
+}
+
+
+void UI::scroll_down() {
+	top_song_in_list += songs_to_scroll;
+	// Ensure scrolling cannot go past the last song
+	if (top_song_in_list >= all_songs->size() - songs_that_can_fit_on_screen) top_song_in_list = all_songs->size() - songs_that_can_fit_on_screen;
 }
 
 

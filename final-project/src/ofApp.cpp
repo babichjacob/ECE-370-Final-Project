@@ -4,36 +4,30 @@
 void ofApp::setup(){
 	ofSetBackgroundColor(ofColor::white);
 	ofSetFrameRate(60);
-	ofSetBackgroundAuto(false);
+	ofSetBackgroundAuto(true);
 
 	srand(time(NULL));
 
+
+	all_songs = find_all_songs();
+	albums_map = build_albums(all_songs);
+	artists_map = build_artists(albums_map);
+	ui.frame_loaded = ofGetFrameNum();
+
 	ui.setup();
+
+	ui.all_songs = &all_songs;
+	ui.albums_map = &albums_map;
+	ui.artists_map = &artists_map;
 }
 
 //--------------------------------------------------------------
 void ofApp::update(){
-	ui.update();
 
-	// Spread loading across 3 frames (so we could potentially display a loading animation alongside)
-	switch (ofGetFrameNum()) {
-	case 1:
-		all_songs = find_all_songs();
-		break;
-	case 2:
-		albums_map = build_albums(all_songs);
-		break;
-	case 3:
-		artists_map = build_artists(albums_map);
-		break;
-	case 4:
-		ui.frame_loaded = ofGetFrameNum();
-		break;
-	}
 }
 
 //--------------------------------------------------------------
-void ofApp::draw(){
+void ofApp::draw() {
 	ui.draw();
 }
 
@@ -78,12 +72,17 @@ void ofApp::mouseExited(int x, int y){
 }
 
 void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
-	ofSetBackgroundColor(rand() % 256, rand() % 256, rand() % 256);
+	if (scrollY == +1) {
+		ui.scroll_up();
+	}
+	else if (scrollY == -1) {
+		ui.scroll_down();
+	}
 }
 
 //--------------------------------------------------------------
 void ofApp::windowResized(int w, int h){
-
+	ui.windowResized();
 }
 
 //--------------------------------------------------------------
