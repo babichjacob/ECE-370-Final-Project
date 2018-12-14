@@ -23,6 +23,7 @@ int main( ){
 	ofSetWindowPosition(0, 0);
 
 	// Full size (not to be confused with full-screen or maximized because it is neither of these)
+	// basically it's "windowed borderless"
 	ofSetWindowShape(ofGetScreenWidth(), ofGetScreenHeight());
 
 	// this kicks off the running of my app

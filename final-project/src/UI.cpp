@@ -26,16 +26,25 @@ void UI::setup() {
 	pause_icon.load(".MyTunes/icons/pause.png");
 	cout << "UI::setup: " << "fonts loaded" << endl;
 
+	// dummy
+	currently_playing_song_image.load(".MyTunes/icons/image.png");
+
 	cool_gray_lightest = ofColor(248, 250, 252);
 	cool_gray_lighter = ofColor(241, 245, 248);
 	cool_gray_light = ofColor(218, 225, 231);
 	cool_gray = ofColor(184, 194, 204);
 	cool_gray_darker = ofColor(96, 111, 123);
 	cool_gray_darkest = ofColor(61, 72, 82);
+	cool_black = ofColor(34, 41, 47);
 
 	play_zone.x = 0;
 	play_zone.y = 0;
-	play_zone.height = 120;
+	play_zone.height = 125;
+
+	currently_playing_zone.y = play_zone.y + padding_standard;
+	currently_playing_zone.height = play_zone.height - padding_standard*2;
+
+	currently_playing_song_image.resize(currently_playing_zone.height - 2 * padding_standard, currently_playing_zone.height - 2 * padding_standard);
 
 	columns.x = 0;
 	columns.y = play_zone.y+play_zone.height;
@@ -44,16 +53,19 @@ void UI::setup() {
 
 void UI::update() {
 	play_zone.width = ofGetWidth();
+	
+	// Make the currently play zone take up the middle half of the screen
+	// (or up to the remaining space not occupied by the icons)
+	currently_playing_zone.width = ofGetWidth() < 1700 ? ofGetWidth() - 400 - 17 : ofGetWidth() / 2;
+	currently_playing_zone.x = ofGetWidth() < 1700 ? 400 : ofGetWidth() / 2 - currently_playing_zone.width / 2;
+
 	columns.width = ofGetWidth();
 }
 
 void UI::draw() {
 	// Don't draw a UI until the songs are loaded in
+	// (see below for the fade-in animation that happens once loading is complete)
 	if (frame_loaded == -1) return;
-
-	// Dummy: pretend the UI is this blue rectangle
-	ofSetColor(ofColor::blue);
-	ofDrawRectangle(ofGetWidth() / 4, ofGetHeight() / 4, ofGetWidth() / 2, ofGetHeight() / 2);
 
 	// Draw the play zone
 	ofSetColor(cool_gray_light);
@@ -78,8 +90,26 @@ void UI::draw() {
 
 	ofSetColor(cool_gray_darker);
 	forward_icon.draw(240, get_icon_baseline(play_zone, forward_icon));
-	next_song_icon.draw(290, get_icon_baseline(play_zone, next_song_icon));
+	next_song_icon.draw(298, get_icon_baseline(play_zone, next_song_icon));
 
+	// Draw the currently playing zone
+	ofSetColor(cool_gray_lighter);
+	ofDrawRectRounded(currently_playing_zone, 9);
+
+	// Draw the song information in the currently playing zone
+	ofSetColor(ofColor::steelBlue);
+	currently_playing_song_image.draw(currently_playing_zone.x + padding_standard, get_icon_baseline(play_zone, currently_playing_song_image));
+	
+	int currently_playing_text_x_pos = currently_playing_zone.x + 2 * padding_standard + currently_playing_song_image.getWidth();
+
+	ofSetColor(cool_black);
+	font_medium.drawString("Distant Lovers", currently_playing_text_x_pos, currently_playing_zone.y + font_medium_size + padding_standard);
+
+	ofSetColor(cool_gray_darker);
+	font_medium.drawString("Birth of a New Day", currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height/2 + font_medium_size/2);
+
+	ofSetColor(cool_black);
+	font_medium.drawString("2814", currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height - padding_standard);
 
 	// Draw the columns header
 	ofSetColor(cool_gray_lightest);
@@ -91,7 +121,7 @@ void UI::draw() {
 		if (column_edge != 0) ofDrawRectangle(column_edge, columns.y, 2, columns.height);
 	}
 	
-	// Draw text on top of the header
+	// Draw text on top of the columns header
 	ofSetColor(cool_gray_darker);
 	for (int i = 0; i < columns_entries.size(); i++) {
 		font_medium.drawString(columns_entries[i], columns_edges[i] + font_medium_size, columns.y + columns.height/2.0 + font_medium_size/2.0);

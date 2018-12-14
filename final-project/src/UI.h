@@ -1,8 +1,10 @@
 #pragma once
 
 #include "ofMain.h"
+#include "Song.h"
 
 using std::max;
+using std::min;
 
 
 class UI
@@ -19,9 +21,9 @@ public:
 	void update();
 	void draw();
 
-	void draw_artist_vieW();
+	void draw_artist_view();
 	void draw_album_view();
-	void draw_song_view();
+	void draw_song_view(vector<Song> all_songs);
 
 private:
 	// Colors
@@ -31,6 +33,7 @@ private:
 	ofColor cool_gray;
 	ofColor cool_gray_darker;
 	ofColor cool_gray_darkest;
+	ofColor cool_black;
 	// End colors
 
 	// Fonts
@@ -44,7 +47,11 @@ private:
 	int font_large_size = 18;
 	// End fonts
 
+	// The standard amount of padding inside / around elements
+	int padding_standard = 16;
+
 	ofRectangle play_zone;
+	ofRectangle currently_playing_zone;
 
 	// Icons
 	ofImage previous_song_icon;
@@ -56,6 +63,8 @@ private:
 	ofImage play_icon;
 	ofImage pause_icon;
 	// End icons
+
+	ofImage currently_playing_song_image;
 
 	ofRectangle columns;
 	vector<string> columns_entries = {"Song Name", "Album", "Artist", "Genre", "Year"};
