@@ -11,7 +11,7 @@ class ofApp : public ofBaseApp{
 	UI ui;
 
 	vector<Song> all_songs;
-	unordered_map<string, Album> albums_map;
+	map<string, Album> albums_map;
 	map<string, Artist> artists_map;
 
 	public:

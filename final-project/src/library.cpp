@@ -32,13 +32,13 @@ vector<Song> find_all_songs() {
 }
 
 
-unordered_map<string, Album> build_albums(vector<Song> songs) {
-	unordered_map<string, Album> albums_map;
+map<string, Album> build_albums(vector<Song> songs) {
+	map<string, Album> albums_map;
 
 	for (auto &song : songs) {
 		// Find a pre-existing album
 		if (albums_map.count(song.album) > 0) {
-			unordered_map<string, Album>::iterator map_entry = albums_map.find(song.album);
+			map<string, Album>::iterator map_entry = albums_map.find(song.album);
 			Album *this_album = &map_entry->second;
 			// Add this song to the album
 			this_album->songs.push_back(song);
@@ -56,7 +56,7 @@ unordered_map<string, Album> build_albums(vector<Song> songs) {
 	return albums_map;
 }
 
-map<string, Artist> build_artists(unordered_map<string, Album> albums) {
+map<string, Artist> build_artists(map<string, Album> albums) {
 	map<string, Artist> artists_map;
 
 	for (auto &albums_map_entry : albums) {
@@ -91,7 +91,7 @@ void mp3_main() {
 	cout << "mp3_main: Hello!" << endl;
 
 	vector<Song> all_songs = find_all_songs();
-	unordered_map<string, Album> albums_map = build_albums(all_songs);
+	map<string, Album> albums_map = build_albums(all_songs);
 	map<string, Artist> artists_map = build_artists(albums_map);
 
 	// Now examine our artists
