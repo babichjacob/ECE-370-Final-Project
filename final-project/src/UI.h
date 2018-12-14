@@ -54,7 +54,6 @@ public:
 	void draw_song_view();
 
 	void scroll_up();
-
 	void scroll_down();
 
 private:
@@ -106,8 +105,10 @@ private:
 	vector<ofColor> icon_colors_active = { cool_gray_darkest, cool_gray_darkest, cool_black, cool_black, cool_gray_darkest, cool_gray_darkest };
 	// End icons
 
-
+	
+	// dummy
 	ofImage currently_playing_song_image;
+	// end dummy
 
 
 	ofRectangle columns;
