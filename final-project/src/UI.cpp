@@ -39,6 +39,12 @@ void UI::setup() {
 		this_icon_bundle.color_inactive = icon_colors_inactive[i];
 		this_icon_bundle.color_active = icon_colors_active[i];
 
+		// Initialize all icons as inactive
+		this_icon_bundle.is_active = false;
+
+		// Set the shortcut keys
+		this_icon_bundle.shortcut_key = icon_shortcuts[i];
+
 		// Finally, add the icon bundle to the map
 		icons.insert(pair<string, IconBundle>(icon_name, this_icon_bundle));
 	}
@@ -84,7 +90,7 @@ void UI::windowResized() {
 	songs_that_can_fit_on_screen = view_zone.height / song_entry_height;
 }
 
-void UI::draw_full() {
+void UI::draw_full(bool is_paused) {
 	// Don't draw a UI until the songs are loaded in
 	// (see below for the fade-in animation that happens once loading is complete)
 	if (frame_loaded == -1) return;
@@ -93,53 +99,10 @@ void UI::draw_full() {
 	ofSetColor(cool_gray_light);
 	ofDrawRectangle(play_zone);
 
-	// Draw icons in the play zone
-	for (auto &icon_name_and_bundle : icons) {
-		if (icon_name_and_bundle.first == "play") {
-			// todo
-		}
-		else if (icon_name_and_bundle.first == "pause") {
-			// todo (for now just draw the play icon)
-			continue;
-		}
-
-		icon_name_and_bundle.second.hitbox.y = get_icon_baseline(play_zone, icon_name_and_bundle.second.icon);
-		
-		// If the icon is being actively pressed (see ofApp::mousePressed)
-		if (icon_name_and_bundle.second.is_active) {
-			// Then show the active color instead
-			ofSetColor(icon_name_and_bundle.second.color_active);
-		}
-		// Otherwise,
-		else {
-			// show the inactive color
-			ofSetColor(icon_name_and_bundle.second.color_inactive);
-		}
-
-		// Finally, draw the icon where it belongs
-		icon_name_and_bundle.second.icon.draw(icon_name_and_bundle.second.hitbox.x, icon_name_and_bundle.second.hitbox.y);
-	}
+	draw_icons(is_paused);
 
 	// Draw the currently playing zone
-	ofSetColor(cool_gray_lighter);
-	ofDrawRectRounded(currently_playing_zone, 9);
-
-	// Draw the song information in the currently playing zone
-	ofSetColor(ofColor::steelBlue);
-	currently_playing_song_image.draw(currently_playing_zone.x + padding_standard, get_icon_baseline(play_zone, currently_playing_song_image));
-	
-	int currently_playing_text_x_pos = currently_playing_zone.x + 2 * padding_standard + currently_playing_song_image.getWidth();
-
-	// dummy
-	ofSetColor(cool_black);
-	font_md.drawString("Distant Lovers", currently_playing_text_x_pos, currently_playing_zone.y + font_md_size + padding_standard);
-
-	ofSetColor(cool_gray_darker);
-	font_md.drawString("Birth of a New Day", currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height/2 + font_md_size/2);
-
-	ofSetColor(cool_black);
-	font_md.drawString("2814", currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height - padding_standard);
-	// end dummy
+	draw_currently_playing_zone();
 
 	// Draw the columns header
 	ofSetColor(cool_gray_lightest);
@@ -183,8 +146,60 @@ void UI::draw_full() {
 }
 
 
+void UI::draw_icons(bool is_paused) {
+	// Draw icons in the play zone
+	for (auto &icon_name_and_bundle : icons) {
+		if (icon_name_and_bundle.first == "play") {
+			if (!is_paused) continue;
+		}
+		else if (icon_name_and_bundle.first == "pause") {
+			if (is_paused) continue;
+		}
+
+		icon_name_and_bundle.second.hitbox.y = get_icon_baseline(play_zone, icon_name_and_bundle.second.icon);
+
+		// If the icon is being actively pressed (see ofApp::mousePressed)
+		if (icon_name_and_bundle.second.is_active) {
+			// Then show the active color instead
+			ofSetColor(icon_name_and_bundle.second.color_active);
+		}
+		// Otherwise,
+		else {
+			// show the inactive color
+			ofSetColor(icon_name_and_bundle.second.color_inactive);
+		}
+
+		// Finally, draw the icon where it belongs
+		icon_name_and_bundle.second.icon.draw(icon_name_and_bundle.second.hitbox.x, icon_name_and_bundle.second.hitbox.y);
+	}
+}
+
+
+void UI::draw_currently_playing_zone() {
+	// Draw the rounded rectangle background
+	ofSetColor(cool_gray_lighter);
+	ofDrawRectRounded(currently_playing_zone, 9);
+
+	// Draw the song information in the currently playing zone
+	ofSetColor(ofColor::steelBlue);
+	currently_playing_song_image.draw(currently_playing_zone.x + padding_standard, get_icon_baseline(play_zone, currently_playing_song_image));
+
+	int currently_playing_text_x_pos = currently_playing_zone.x + 2 * padding_standard + currently_playing_song_image.getWidth();
+
+	// dummy
+	ofSetColor(cool_black);
+	font_md.drawString("Distant Lovers", currently_playing_text_x_pos, currently_playing_zone.y + font_md_size + padding_standard);
+
+	ofSetColor(cool_gray_darker);
+	font_md.drawString("Birth of a New Day", currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height / 2 + font_md_size / 2);
+
+	ofSetColor(cool_black);
+	font_md.drawString("2814", currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height - padding_standard);
+	// end dummy
+}
+
+
 void UI::draw_splash_screen(float time_progress) {
-	cout << endl << endl << "UI::draw_splash_screen: debug: time_progress=" << time_progress << endl << endl << endl;
 	// Opacity as a function of frames elapsed
 	float opacity = 1 - pow(time_progress, 5);
 
@@ -214,22 +229,38 @@ void UI::draw_song_view() {
 	ofSetColor(ofGetBackgroundColor());
 	ofDrawRectangle(view_zone);
 
-	for (int i = top_song_in_list, n = all_songs->size(); i < n; i++) {
-		Song this_song = (*all_songs)[i];
-		
-		int this_song_origin_y = view_zone.y + song_entry_height * (i - top_song_in_list);
-		
+	song_entries.clear();
+
+	for (int j = 0; j < songs_that_can_fit_on_screen-1; j++) {
+		int index = j + top_song_in_list;
+
+		Song this_song = (*all_songs)[index];
+		SongEntry this_song_entry;
+
+		this_song_entry.index = index;
+
+		this_song_entry.song = this_song;
+
+		this_song_entry.hitbox.x = 0;
+		this_song_entry.hitbox.y = view_zone.y + j*song_entry_height;
+		this_song_entry.hitbox.height = song_entry_height;
+		this_song_entry.hitbox.width = ofGetWidth();
+
+
+		// Add the song entry to the list of song entries
+		song_entries.push_back(this_song_entry);
+
 		// Zebra striping
-		ofSetColor(i % 2 == 0 ? ofColor::white : cool_gray_lightest);
-		ofDrawRectangle(0, this_song_origin_y, ofGetWidth(), song_entry_height);
+		ofSetColor(j % 2 == 0 ? ofColor::white : cool_gray_lightest);
+		ofDrawRectangle(this_song_entry.hitbox);
 
 		// Write out song info (text)
 		ofSetColor(cool_gray_darkest);
-		font_md.drawString(this_song.title,             columns_edges[0] + font_md_size, this_song_origin_y + font_md_size + padding_song_entry);
-		font_md.drawString(this_song.album,             columns_edges[1] + font_md_size, this_song_origin_y + font_md_size + padding_song_entry);
-		font_md.drawString(this_song.artist,            columns_edges[2] + font_md_size, this_song_origin_y + font_md_size + padding_song_entry);
-		font_md.drawString(this_song.genre,             columns_edges[3] + font_md_size, this_song_origin_y + font_md_size + padding_song_entry);
-		font_md.drawString(to_string(this_song.year),   columns_edges[4] + font_md_size, this_song_origin_y + font_md_size + padding_song_entry);
+		font_md.drawString(this_song.title,             columns_edges[0] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		font_md.drawString(this_song.album,             columns_edges[1] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		font_md.drawString(this_song.artist,            columns_edges[2] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		font_md.drawString(this_song.genre,             columns_edges[3] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		font_md.drawString(to_string(this_song.year),   columns_edges[4] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
 	}
 }
 

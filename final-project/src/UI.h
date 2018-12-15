@@ -29,12 +29,16 @@ struct IconBundle {
 
 	// Whether the icon is currently being pressed or not
 	bool is_active = false;
+
+	// Which key the icon is a shortcut for
+	int shortcut_key;
 };
 
 typedef struct IconBundle IconBundle;
 
 
 struct SongEntry {
+	int index;
 	Song song;
 	ofRectangle hitbox;
 };
@@ -61,14 +65,20 @@ public:
 	ofRectangle play_zone;
 	ofRectangle currently_playing_zone;
 	ofRectangle view_zone;
+	// A vector of all the song entries visible on-screen at the moment 
+	// (public -- necessary because of click detection in ofApp)
+	vector<SongEntry> song_entries;
 
 
 	UI();
 	~UI();
 	void setup();
 	void windowResized();
-	void draw_full();
-
+	
+	void draw_full(bool is_paused);
+	
+	void draw_icons(bool is_paused);
+	void draw_currently_playing_zone();
 	void draw_splash_screen(float time_progress);
 
 	void draw_artist_view();
@@ -111,13 +121,15 @@ private:
 	// The name of each icon (also corresponds to a file in the `.MyTunes/icons` folder)
 	vector<string> icon_names = { "previous", "backward", "play", "pause", "forward", "next" };
 	// These are eyeballed values (it's an aesthetics thing)
-	vector <int> hitboxes_top_left_x = { 60, 118, 184, 184, 240, 298 };
+	vector <int> hitboxes_top_left_x = { 60, 118, 184, 180, 240, 298 };
 	// Colors when there is nothing being done to the icon
 	// Note: since play / pause is the primary action, it is emphasized by being slightly darker
 	// Note: all the images are white colored in their file so that they can be tinted here
 	vector<ofColor> icon_colors_inactive = { cool_gray_darker, cool_gray_darker, cool_gray_darkest, cool_gray_darkest, cool_gray_darker, cool_gray_darker };
 	// Colors when the icon is being clicked on (aka within the range of the hitbox -- the whole point of creating such a thing)
 	vector<ofColor> icon_colors_active = { cool_gray_darkest, cool_gray_darkest, cool_black, cool_black, cool_gray_darkest, cool_gray_darkest };
+	// What each key an icon is a shortcut for
+	vector<int> icon_shortcuts = { OF_KEY_LEFT, ',', ' ', ' ', '.', OF_KEY_RIGHT };
 	// End icons
 
 	
@@ -143,9 +155,6 @@ private:
 
 	// Will be calculated from the height in the view space and the height of each song entry
 	int songs_that_can_fit_on_screen;
-	
-	// A vector of all the song entries visible on-screen at the moment
-	vector<SongEntry> song_entries;
 	// End song view
 };
 

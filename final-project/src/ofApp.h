@@ -11,6 +11,18 @@
 class ofApp : public ofBaseApp{
 	UI ui;
 
+	ofSoundPlayer player;
+
+	// As crazy as it sounds, ofSoundPlayer cannot / does not keep track 
+	// of whether or not it's paused
+	bool is_paused = true;
+
+	int index_of_currently_playing_song = 0;
+
+	// How much time is skipped by a forward or rewind
+	int skip_time = 10;
+
+
 	Songs all_songs;
 	Albums albums_map;
 	Artists artists_map;
@@ -32,5 +44,8 @@ class ofApp : public ofBaseApp{
 		void windowResized(int w, int h);
 		void dragEvent(ofDragInfo dragInfo);
 		void gotMessage(ofMessage msg);
+
+
+		void start_playing(Song song, int song_index);
 		
 };
