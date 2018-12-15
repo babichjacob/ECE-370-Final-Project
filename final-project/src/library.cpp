@@ -37,9 +37,10 @@ Albums build_albums(Songs songs) {
 	Albums albums_map;
 
 	for (auto &song : songs) {
+		pair<string, string> key(song.album_artist, song.album);
 		// Find a pre-existing album
-		if (albums_map.count(song.album) > 0) {
-			Albums::iterator map_entry = albums_map.find(song.album);
+		if (albums_map.count(key) > 0) {
+			Albums::iterator map_entry = albums_map.find(key);
 			Album *this_album = &map_entry->second;
 			// Add this song to the album
 			this_album->songs.push_back(song);
@@ -49,7 +50,7 @@ Albums build_albums(Songs songs) {
 			Album new_album(song.album);
 			// Add this song to the album (has to be done before adding it to the map)
 			new_album.songs.push_back(song);
-			pair<string, Album> map_entry(song.album, new_album);
+			pair<pair<string, string>, Album> map_entry(key, new_album);
 			albums_map.insert(map_entry);
 		}
 	}
@@ -119,8 +120,8 @@ void mp3_main() {
 	cout << "mp3_main: Hello!" << endl;
 
 	Songs all_songs = find_all_songs();
-	map<string, Album> albums_map = build_albums(all_songs);
-	map<string, Artist> artists_map = build_artists(albums_map);
+	Albums albums_map = build_albums(all_songs);
+	Artists artists_map = build_artists(albums_map);
 
 	// Now examine our artists
 	cout << endl;

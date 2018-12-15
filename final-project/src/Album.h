@@ -32,4 +32,4 @@ public:
 };
 
 
-typedef map<string, Album> Albums;
+typedef map<pair<string, string>, Album> Albums;
