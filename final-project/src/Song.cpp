@@ -109,7 +109,7 @@ void Song::set_from_cache(fs::path path) {
 	album = parsed_csv[1];
 	artist = parsed_csv[2];
 	genre = parsed_csv[3];
-	track_of_album = parsed_csv[4];
+	track_of_album = stoi(parsed_csv[4]);
 	year = stoi(parsed_csv[5]);
 	// Out of order because this was added after the fact
 	album_artist = parsed_csv[6];
@@ -148,14 +148,31 @@ void Song::set_from_file(fs::path path) {
 	else genre = "Unknown Genre";
 
 	ID3v2::Frame::v23::TRCK *trck = dynamic_cast<ID3v2::Frame::v23::TRCK *>(mp3_tag.GetFrameWithName("TRCK"));
-	if (trck != nullptr) track_of_album = get_frame_data_as_string(trck->GetData(), trck->GetSize());
-	else track_of_album = "1/1";
+	// It often happens that this field is something like "4/7", or it could just be "3" (for example)
+	// in other cases (both are valid) but we just want that 4 or that 3 and disregard the 7.
+	// Thankfully, `stoi` does that for us
+	// Sadly, it can raise an `invalid_argument` error and we need to catch that and use the default value (1) instead
+	try {
+		if (trck != nullptr) track_of_album = stoi(get_frame_data_as_string(trck->GetData(), trck->GetSize()));
+		else track_of_album = 1;
+	}
+	catch (invalid_argument &e) {
+		// (void)ing a variable means to ignore it (the compiler gives a warning for not using this variable)
+		(void)e;
+		track_of_album = 1;
+	}
 
 	ID3v2::Frame::v23::TYER *tyer = dynamic_cast<ID3v2::Frame::v23::TYER *>(mp3_tag.GetFrameWithName("TYER"));
-	if (tpe1 != nullptr) year = stoi(get_frame_data_as_string(tyer->GetData(), tyer->GetSize()));
-	else year = 1900;
+	// See above for handling the cases where the year is missing from the data
+	try {
+		if (tpe1 != nullptr) year = stoi(get_frame_data_as_string(tyer->GetData(), tyer->GetSize()));
+		else year = 1900;
+	}
+	catch (invalid_argument &e) {
+		(void)e;
+		year = 1900;
+	}
 }
-
 
 void Song::print() {
 	for (int i = 0; i < 40; i++) cout << "-";
