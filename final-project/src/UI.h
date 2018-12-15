@@ -34,6 +34,14 @@ struct IconBundle {
 typedef struct IconBundle IconBundle;
 
 
+struct SongEntry {
+	Song song;
+	ofRectangle hitbox;
+};
+
+typedef struct SongEntry SongEntry;
+
+
 class UI
 {
 public:
@@ -59,7 +67,7 @@ public:
 	~UI();
 	void setup();
 	void windowResized();
-	void draw();
+	void draw_full();
 
 	void draw_splash_screen(float time_progress);
 
@@ -135,6 +143,9 @@ private:
 
 	// Will be calculated from the height in the view space and the height of each song entry
 	int songs_that_can_fit_on_screen;
+	
+	// A vector of all the song entries visible on-screen at the moment
+	vector<SongEntry> song_entries;
 	// End song view
 };
 

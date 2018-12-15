@@ -84,7 +84,7 @@ void UI::windowResized() {
 	songs_that_can_fit_on_screen = view_zone.height / song_entry_height;
 }
 
-void UI::draw() {
+void UI::draw_full() {
 	// Don't draw a UI until the songs are loaded in
 	// (see below for the fade-in animation that happens once loading is complete)
 	if (frame_loaded == -1) return;
@@ -210,6 +210,10 @@ void UI::draw_album_view() {
 
 
 void UI::draw_song_view() {
+	// Clear the view zone
+	ofSetColor(ofGetBackgroundColor());
+	ofDrawRectangle(view_zone);
+
 	for (int i = top_song_in_list, n = all_songs->size(); i < n; i++) {
 		Song this_song = (*all_songs)[i];
 		
