@@ -26,6 +26,9 @@ struct IconBundle {
 	ofRectangle hitbox;
 	ofColor color_inactive;
 	ofColor color_active;
+
+	// Whether the icon is currently being pressed or not
+	bool is_active = false;
 };
 
 typedef struct IconBundle IconBundle;
@@ -43,11 +46,22 @@ public:
 	Albums *albums_map;
 	Songs *all_songs;
 
+	// Icons (public -- necessary because of click detection in ofApp)
+	map<string, IconBundle> icons;
+
+	// Zones with clickable elements (public -- necessary because of click detection in ofApp)
+	ofRectangle play_zone;
+	ofRectangle currently_playing_zone;
+	ofRectangle view_zone;
+
+
 	UI();
 	~UI();
 	void setup();
 	void windowResized();
 	void draw();
+
+	void draw_splash_screen(float time_progress);
 
 	void draw_artist_view();
 	void draw_album_view();
@@ -68,18 +82,16 @@ private:
 	// End color palette
 
 	// Fonts
-	ofTrueTypeFont font_small;
-	int font_small_size = 9;
-
-	ofTrueTypeFont font_medium;
-	int font_medium_size = 13;
-
-	ofTrueTypeFont font_large;
-	int font_large_size = 18;
+	ofTrueTypeFont font_md;
+	int font_md_size = 13;
+	
+	ofTrueTypeFont font_xl;
+	int font_xl_size = 96;
 	// End fonts
 
 	// How long the fade-in animation will last
-	int transition_duration_frames = 60;
+	// 45 frames / 60 frames per second = 0.75 seconds
+	int transition_duration_frames = 45;
 
 	// How many songs are scrolled into / out of view when scrolling
 	int songs_to_scroll = 5;
@@ -87,12 +99,7 @@ private:
 	// The standard amount of padding inside / around elements
 	int padding_standard = 16;
 
-	ofRectangle play_zone;
-	ofRectangle currently_playing_zone;
-
-	// Icons
-	map<string, IconBundle> icons;
-
+	// Icons (private information before bundling)
 	// The name of each icon (also corresponds to a file in the `.MyTunes/icons` folder)
 	vector<string> icon_names = { "previous", "backward", "play", "pause", "forward", "next" };
 	// These are eyeballed values (it's an aesthetics thing)
@@ -110,23 +117,25 @@ private:
 	ofImage currently_playing_song_image;
 	// end dummy
 
-
+	// Columns
 	ofRectangle columns;
 	vector<string> columns_entries = {"Song Name", "Album", "Artist", "Genre", "Year"};
 	vector<int> columns_edges = {0, 550, 950, 1350, 1600};
 	int columns_border_size = 2;
+	// End columns
 
+	// Views
 
-	ofRectangle view_space;
-
+	// Song view
 	// Index of the top-most song in the list when in song view
 	int top_song_in_list = 0;
 
 	int padding_song_entry = padding_standard / 2;
-	int song_entry_height = font_medium_size + padding_song_entry * 2;
+	int song_entry_height = font_md_size + padding_song_entry * 2;
 
 	// Will be calculated from the height in the view space and the height of each song entry
 	int songs_that_can_fit_on_screen;
+	// End song view
 };
 
 

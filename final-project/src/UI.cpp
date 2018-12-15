@@ -12,9 +12,8 @@ UI::~UI()
 
 void UI::setup() {
 	cout << "UI::setup: " << "about to load fonts" << endl;
-	font_small.load(".MyTunes/fonts/Heebo/Heebo-Regular.ttf", font_small_size);
-	font_medium.load(".MyTunes/fonts/Heebo/Heebo-Light.ttf", font_medium_size);
-	font_large.load(".MyTunes/fonts/Heebo/Heebo-Thin.ttf", font_large_size);
+	font_md.load(".MyTunes/fonts/Heebo/Heebo-Light.ttf", font_md_size);
+	font_xl.load(".MyTunes/fonts/Heebo/Heebo-Thin.ttf", font_xl_size);
 	cout << "UI::setup: " << "done loading fonts" << endl;
 
 	cout << "UI::setup: " << "about to load icons" << endl;
@@ -65,7 +64,7 @@ void UI::setup() {
 	columns.y = play_zone.y+play_zone.height;
 	columns.height = 30;
 
-	view_space.x = 0;
+	view_zone.x = 0;
 }
 
 void UI::windowResized() {
@@ -78,11 +77,11 @@ void UI::windowResized() {
 
 	columns.width = ofGetWidth();
 
-	view_space.y = columns.y + columns.height + columns_border_size;
-	view_space.height = ofGetHeight() - view_space.y;
-	view_space.width = ofGetWidth();
+	view_zone.y = columns.y + columns.height + columns_border_size;
+	view_zone.height = ofGetHeight() - view_zone.y;
+	view_zone.width = ofGetWidth();
 
-	songs_that_can_fit_on_screen = view_space.height / song_entry_height;
+	songs_that_can_fit_on_screen = view_zone.height / song_entry_height;
 }
 
 void UI::draw() {
@@ -106,12 +105,10 @@ void UI::draw() {
 
 		icon_name_and_bundle.second.hitbox.y = get_icon_baseline(play_zone, icon_name_and_bundle.second.icon);
 		
-		// If the mouse is being pressed, and it's within the bounds of the hitbox (our icon)
-		if (ofGetMousePressed() && (icon_name_and_bundle.second.hitbox.inside(ofGetMouseX(), ofGetMouseY()))) {
+		// If the icon is being actively pressed (see ofApp::mousePressed)
+		if (icon_name_and_bundle.second.is_active) {
 			// Then show the active color instead
 			ofSetColor(icon_name_and_bundle.second.color_active);
-
-			// todo: and trigger the pressed event
 		}
 		// Otherwise,
 		else {
@@ -135,13 +132,13 @@ void UI::draw() {
 
 	// dummy
 	ofSetColor(cool_black);
-	font_medium.drawString("Distant Lovers", currently_playing_text_x_pos, currently_playing_zone.y + font_medium_size + padding_standard);
+	font_md.drawString("Distant Lovers", currently_playing_text_x_pos, currently_playing_zone.y + font_md_size + padding_standard);
 
 	ofSetColor(cool_gray_darker);
-	font_medium.drawString("Birth of a New Day", currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height/2 + font_medium_size/2);
+	font_md.drawString("Birth of a New Day", currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height/2 + font_md_size/2);
 
 	ofSetColor(cool_black);
-	font_medium.drawString("2814", currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height - padding_standard);
+	font_md.drawString("2814", currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height - padding_standard);
 	// end dummy
 
 	// Draw the columns header
@@ -161,7 +158,7 @@ void UI::draw() {
 	// Draw text on top of the columns header
 	ofSetColor(cool_gray_darker);
 	for (int i = 0; i < columns_entries.size(); i++) {
-		font_medium.drawString(columns_entries[i], columns_edges[i] + font_medium_size, columns.y + columns.height/2.0 + font_medium_size/2.0);
+		font_md.drawString(columns_entries[i], columns_edges[i] + font_md_size, columns.y + columns.height/2.0 + font_md_size/2.0);
 	}
 
 	// Draw the view mode that matches view_mode
@@ -177,18 +174,29 @@ void UI::draw() {
 		break;
 	}
 
-	// Do the fade-in animation when necessary
+	// Do the fade-in animation only when necessary
 	if (ofGetFrameNum() - frame_loaded < transition_duration_frames) {
-		// Opacity as a function of frames elapsed
-		float opacity = 1 - ((float) (ofGetFrameNum() - frame_loaded)) / (float) transition_duration_frames;
-		float opacity_mapped = 1-pow(1-opacity,5);
-
-		// Cover the whole screen the same as the background color (white)
-		ofSetColor(ofGetBackgroundColor(), (int) (255*opacity_mapped));
-		ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+		// Ranges from 0 to 1, where 0 is the very beginning and 1 is the end
+		float time_progress = ((float)(ofGetFrameNum() - frame_loaded)) / (float)transition_duration_frames;
+		draw_splash_screen(time_progress);
 	}
 }
 
+
+void UI::draw_splash_screen(float time_progress) {
+	cout << endl << endl << "UI::draw_splash_screen: debug: time_progress=" << time_progress << endl << endl << endl;
+	// Opacity as a function of frames elapsed
+	float opacity = 1 - pow(time_progress, 5);
+
+	// Cover the whole screen the same as the background color (white)
+	ofSetColor(ofGetBackgroundColor(), (int)(255 * opacity));
+	ofDrawRectangle(0, 0, ofGetWidth(), ofGetHeight());
+
+	// But show the title text in the center of the screen
+	// This text fades out faster (it feels too strong otherwise)
+	ofSetColor(cool_black, (int)(255 * pow(opacity, 5)));
+	font_xl.drawString("MyTunes", ofGetWidth() / 2 - font_xl_size * strlen("MyTunes")/2, ofGetHeight() / 2 - font_xl_size/3);
+}
 
 
 void UI::draw_artist_view() {
@@ -205,7 +213,7 @@ void UI::draw_song_view() {
 	for (int i = top_song_in_list, n = all_songs->size(); i < n; i++) {
 		Song this_song = (*all_songs)[i];
 		
-		int this_song_origin_y = view_space.y + song_entry_height * (i - top_song_in_list);
+		int this_song_origin_y = view_zone.y + song_entry_height * (i - top_song_in_list);
 		
 		// Zebra striping
 		ofSetColor(i % 2 == 0 ? ofColor::white : cool_gray_lightest);
@@ -213,11 +221,11 @@ void UI::draw_song_view() {
 
 		// Write out song info (text)
 		ofSetColor(cool_gray_darkest);
-		font_medium.drawString(this_song.title,             columns_edges[0] + font_medium_size, this_song_origin_y + font_medium_size  + padding_song_entry);
-		font_medium.drawString(this_song.album,             columns_edges[1] + font_medium_size, this_song_origin_y + font_medium_size + padding_song_entry);
-		font_medium.drawString(this_song.artist,            columns_edges[2] + font_medium_size, this_song_origin_y + font_medium_size + padding_song_entry);
-		font_medium.drawString(this_song.genre,             columns_edges[3] + font_medium_size, this_song_origin_y + font_medium_size + padding_song_entry);
-		font_medium.drawString(to_string(this_song.year),   columns_edges[4] + font_medium_size, this_song_origin_y + font_medium_size + padding_song_entry);
+		font_md.drawString(this_song.title,             columns_edges[0] + font_md_size, this_song_origin_y + font_md_size + padding_song_entry);
+		font_md.drawString(this_song.album,             columns_edges[1] + font_md_size, this_song_origin_y + font_md_size + padding_song_entry);
+		font_md.drawString(this_song.artist,            columns_edges[2] + font_md_size, this_song_origin_y + font_md_size + padding_song_entry);
+		font_md.drawString(this_song.genre,             columns_edges[3] + font_md_size, this_song_origin_y + font_md_size + padding_song_entry);
+		font_md.drawString(to_string(this_song.year),   columns_edges[4] + font_md_size, this_song_origin_y + font_md_size + padding_song_entry);
 	}
 }
 
