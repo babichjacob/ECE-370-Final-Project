@@ -27,6 +27,7 @@ public:
 	~Album();
 	Album(string name);
 	void inherit_metadata();
+	void reorder_songs();
 	void print();
 };
 

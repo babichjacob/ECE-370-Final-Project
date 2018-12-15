@@ -61,6 +61,9 @@ Artists build_artists(Albums albums) {
 	Artists artists_map;
 
 	for (auto &albums_map_entry : albums) {
+		// Re-order the songs so that they are in the order of track number
+		albums_map_entry.second.reorder_songs();
+
 		// Load the metadata (genre and year for now) from the album's songs into the album itself
 		albums_map_entry.second.inherit_metadata();
 
@@ -87,26 +90,25 @@ Artists build_artists(Albums albums) {
 }
 
 
-Songs rebuild_songs(Artists artists_map) {
+Songs rebuild_songs(Artists artists_map, int number_of_songs) {
 	// Create a new vector of songs sorted by artist, then by album
 	// (though this should be the case by default for a well-maintained library,
 	//  not every library is well-maintained)
 	Songs sorted_songs;
-	int number_of_songs = 0;
+
+	// Open up enough space for the number of songs we already have
+	sorted_songs.reserve(number_of_songs);
 
 	// For every artist,
 	for (auto &artists_map_entry : artists_map) {
 		// For each of their albums,
+		// (we assume that `reorder_songs()` has already been called for each album)
 		for (auto &album : artists_map_entry.second.albums) {
-			// Add to the number of songs
-			// todo: it might just make the most sense to just push_back here...
-			// (provided the album's songs have been sorted)
-			number_of_songs += album.songs.size();
+			// Do something called "extending" the vector
+			// AKA adding all the contents from one vector to another
+			sorted_songs.insert(sorted_songs.end(), album.songs.begin(), album.songs.end());
 		}
 	}
-
-	// Open up enough space for the number of songs we already have
-	sorted_songs.reserve(number_of_songs);
 
 	return sorted_songs;
 }

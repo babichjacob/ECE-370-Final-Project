@@ -22,6 +22,6 @@ Songs find_all_songs();
 Albums build_albums(Songs songs);
 Artists build_artists(Albums albums);
 
-Songs rebuild_songs(Songs songs);
+Songs rebuild_songs(Artists artists_map, int number_of_songs);
 
 void mp3_main();

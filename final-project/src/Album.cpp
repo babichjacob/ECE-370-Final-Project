@@ -33,6 +33,26 @@ void Album::inherit_metadata() {
 	}
 }
 
+
+void Album::reorder_songs() {
+	map<int, Song> songs_by_track_number;
+
+	// Rely on the ordered nature of map to do the sorting for us
+	for (auto &song : songs) {
+		songs_by_track_number.insert(pair<int, Song>(song.track_of_album, song));
+	}
+
+	// Clear the list of songs this album has so we can fill it back up
+	// with proper ordering
+	songs.clear();
+	
+	// This will iterate in order for us
+	for (auto &track_number_and_song : songs_by_track_number) {
+		songs.push_back(track_number_and_song.second);
+	}
+}
+
+
 void Album::print() {
 	// Separator
 	for (int i = 0; i < 60; i++) cout << "-";

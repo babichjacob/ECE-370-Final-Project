@@ -4,7 +4,7 @@
 void ofApp::setup(){
 	ofSetBackgroundColor(ofColor::white);
 	ofSetFrameRate(60);
-	ofSetBackgroundAuto(true);
+	ofSetBackgroundAuto(false);
 
 	ui.setup();
 }
@@ -20,6 +20,7 @@ void ofApp::update(){
 		all_songs = find_all_songs();
 		albums_map = build_albums(all_songs);
 		artists_map = build_artists(albums_map);
+		all_songs = rebuild_songs(artists_map, all_songs.size());
 		ui.frame_loaded = ofGetFrameNum();
 
 		ui.all_songs = &all_songs;
@@ -31,7 +32,7 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw() {
 	if (ofGetFrameNum() < 5) ui.draw_splash_screen(0);
-	ui.draw();
+	ui.draw_full();
 }
 
 //--------------------------------------------------------------
@@ -91,9 +92,11 @@ void ofApp::mouseExited(int x, int y){
 void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
 	if (scrollY == +1) {
 		ui.scroll_up();
+		ui.draw_song_view();
 	}
 	else if (scrollY == -1) {
 		ui.scroll_down();
+		ui.draw_song_view();
 	}
 }
 
