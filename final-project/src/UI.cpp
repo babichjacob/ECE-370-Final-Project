@@ -227,7 +227,7 @@ void UI::draw_currently_playing_zone(Song song, ofSoundPlayer player) {
 	pair<int, int> since_start = convert_ms_to_min_and_sec(player.getPositionMS());
 
 	// Calculate total song length
-	int song_length = player.getPositionMS() / player.getPosition();
+	int song_length = round(player.getPositionMS() / player.getPosition());
 	// Determine the amount of time left
 	int time_left = song_length - player.getPositionMS();
 	// Convert total milliseconds to minutes and seconds

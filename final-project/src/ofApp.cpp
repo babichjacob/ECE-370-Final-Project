@@ -31,7 +31,7 @@ void ofApp::update(){
 	// Start playing the next song when the current one finishes
 	// (less than 80 milliseconds left I guess)
 	if (player.isPlaying() && player.getPosition() != 0) {
-		int song_length_ms = player.getPositionMS() / player.getPosition();
+		int song_length_ms = round(player.getPositionMS() / player.getPosition());
 		if (song_length_ms - player.getPositionMS() <= 80) {
 			cout << "next song coming up" << endl;
 			keyPressed(OF_KEY_RIGHT);
@@ -93,7 +93,7 @@ void ofApp::keyPressed(int key){
 	// When the period key is pressed,
 	if (key == '.') {
 		// Fast forward `skip_time` seconds
-		int song_length_ms = player.getPositionMS() / player.getPosition();
+		int song_length_ms = round(player.getPositionMS() / player.getPosition());
 		player.setPositionMS(min(song_length_ms, player.getPositionMS() + skip_time * 1000));
 	}
 }
@@ -228,6 +228,7 @@ void ofApp::start_playing(Song song, int song_index) {
 	index_of_currently_playing_song = song_index;
 
 	// Load the artwork into the image
+	cout << "loading image " << song.artwork_file_path.string() << endl;
 	ui.currently_playing_song_image.load(song.artwork_file_path.string());
 	ui.resize_artwork();
 
