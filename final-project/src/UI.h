@@ -169,7 +169,7 @@ private:
 	// Index of the top-most song in the list when in song view
 	int top_song_in_list = 0;
 
-	int padding_song_entry = padding_standard / 2;
+	int padding_song_entry = padding_standard*0.625;
 	int song_entry_height = font_md_size + padding_song_entry * 2;
 
 	// Will be calculated from the height in the view space and the height of each song entry
