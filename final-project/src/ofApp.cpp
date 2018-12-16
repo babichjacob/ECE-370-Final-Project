@@ -228,14 +228,16 @@ void ofApp::start_playing(Song song, int song_index) {
 	index_of_currently_playing_song = song_index;
 
 	// Load the artwork into the image
-	cout << "loading image " << song.artwork_file_path.string() << endl;
 	ui.currently_playing_song_image.load(song.artwork_file_path.string());
+	// And make sure it's the proper size
 	ui.resize_artwork();
 
+	// Never start a song paused
 	is_paused = false;
 	player.setPaused(false);
 	// The second parameter determines whether or not the player can stream directly from the file
 	// without loading it in its entirety first (much faster)
 	player.load(song.music_file_path.string(), true);
+	
 	player.play();
 }
