@@ -219,7 +219,7 @@ void UI::draw_currently_playing_zone(Song song, ofSoundPlayer player) {
 	ofDrawRectRounded(song_slider_outer, song_slider_outer.height / 2);
 
 	// Inner
-	ofSetColor(cool_gray);
+	ofSetColor(cool_gray_dark);
 	song_slider_inner.width = song_slider_outer.width * player.getPosition();
 	ofDrawRectRounded(song_slider_inner, song_slider_inner.height / 2);
 
@@ -239,9 +239,9 @@ void UI::draw_currently_playing_zone(Song song, ofSoundPlayer player) {
 	string to_end_colonized = "-" + format_as_time(to_end.first, to_end.second);
 
 	// Draw them on screen
-	int time_indicators_pos_y = song_slider_outer.y + song_slider_outer.height + padding_standard;
+	int time_indicators_pos_y = song_slider_outer.y + song_slider_outer.height + font_md_size*1.5;
 
-	ofSetColor(cool_gray);
+	ofSetColor(cool_gray_dark);
 	font_md.drawString(since_start_colonized, song_slider_outer.x                           - strlen(since_start_colonized.c_str())*font_md_size/3, time_indicators_pos_y);
 
 	if (time_left >= 0) // There's a problem with this showing a really large negative number at the beginning of the song, so just don't draw it in those cases

@@ -104,6 +104,7 @@ private:
 	ofColor cool_gray_lighter = ofColor(241, 245, 248);
 	ofColor cool_gray_light = ofColor(218, 225, 231);
 	ofColor cool_gray = ofColor(184, 194, 204);
+	ofColor cool_gray_dark = ofColor(135, 149, 161);
 	ofColor cool_gray_darker = ofColor(96, 111, 123);
 	ofColor cool_gray_darkest = ofColor(61, 72, 82);
 	ofColor cool_black = ofColor(34, 41, 47);
