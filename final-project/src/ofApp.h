@@ -47,5 +47,4 @@ class ofApp : public ofBaseApp{
 
 
 		void start_playing(Song song, int song_index);
-		
 };

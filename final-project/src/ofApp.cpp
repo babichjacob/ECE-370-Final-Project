@@ -42,9 +42,8 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw() {
 	if (ofGetFrameNum() < 5) ui.draw_splash_screen(0);
-
+	else ui.draw_full(is_paused, all_songs[index_of_currently_playing_song], player);
 	// todo: optimize to only draw on changes
-	ui.draw_full(is_paused);
 }
 
 //--------------------------------------------------------------

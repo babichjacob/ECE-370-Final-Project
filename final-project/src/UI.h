@@ -74,11 +74,14 @@ public:
 	~UI();
 	void setup();
 	void windowResized();
-	
-	void draw_full(bool is_paused);
-	
+
+	void draw_full(bool is_paused, Song song, ofSoundPlayer player);
+
+	void draw_play_zone();
 	void draw_icons(bool is_paused);
-	void draw_currently_playing_zone();
+
+	void draw_currently_playing_zone(Song song, ofSoundPlayer player);
+
 	void draw_splash_screen(float time_progress);
 
 	void draw_artist_view();

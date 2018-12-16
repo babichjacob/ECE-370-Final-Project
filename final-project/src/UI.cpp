@@ -87,22 +87,22 @@ void UI::windowResized() {
 	view_zone.height = ofGetHeight() - view_zone.y;
 	view_zone.width = ofGetWidth();
 
-	songs_that_can_fit_on_screen = view_zone.height / song_entry_height;
+	songs_that_can_fit_on_screen = view_zone.height / song_entry_height + 1;
 }
 
-void UI::draw_full(bool is_paused) {
+void UI::draw_full(bool is_paused, Song song, ofSoundPlayer player) {
 	// Don't draw a UI until the songs are loaded in
 	// (see below for the fade-in animation that happens once loading is complete)
 	if (frame_loaded == -1) return;
 
 	// Draw the play zone
-	ofSetColor(cool_gray_light);
-	ofDrawRectangle(play_zone);
+	draw_play_zone();
 
+	// Draw icons in the play zone
 	draw_icons(is_paused);
 
 	// Draw the currently playing zone
-	draw_currently_playing_zone();
+	draw_currently_playing_zone(song, player);
 
 	// Draw the columns header
 	ofSetColor(cool_gray_lightest);
@@ -145,6 +145,11 @@ void UI::draw_full(bool is_paused) {
 	}
 }
 
+void UI::draw_play_zone() {
+	ofSetColor(cool_gray_light);
+	ofDrawRectangle(play_zone);
+}
+
 
 void UI::draw_icons(bool is_paused) {
 	// Draw icons in the play zone
@@ -175,27 +180,30 @@ void UI::draw_icons(bool is_paused) {
 }
 
 
-void UI::draw_currently_playing_zone() {
+void UI::draw_currently_playing_zone(Song song, ofSoundPlayer player) {
 	// Draw the rounded rectangle background
 	ofSetColor(cool_gray_lighter);
 	ofDrawRectRounded(currently_playing_zone, 9);
 
 	// Draw the song information in the currently playing zone
+
+	// Cover art
 	ofSetColor(ofColor::steelBlue);
 	currently_playing_song_image.draw(currently_playing_zone.x + padding_standard, get_icon_baseline(play_zone, currently_playing_song_image));
 
 	int currently_playing_text_x_pos = currently_playing_zone.x + 2 * padding_standard + currently_playing_song_image.getWidth();
 
-	// dummy
+	// Title
 	ofSetColor(cool_black);
-	font_md.drawString("Distant Lovers", currently_playing_text_x_pos, currently_playing_zone.y + font_md_size + padding_standard);
+	font_md.drawString(song.title,  currently_playing_text_x_pos, currently_playing_zone.y + font_md_size + padding_standard);
 
+	// Album
 	ofSetColor(cool_gray_darker);
-	font_md.drawString("Birth of a New Day", currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height / 2 + font_md_size / 2);
+	font_md.drawString(song.album,  currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height / 2 + font_md_size / 2);
 
+	// Artist
 	ofSetColor(cool_black);
-	font_md.drawString("2814", currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height - padding_standard);
-	// end dummy
+	font_md.drawString(song.artist, currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height - padding_standard);
 }
 
 
