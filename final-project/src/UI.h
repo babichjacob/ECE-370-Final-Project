@@ -65,6 +65,11 @@ public:
 	ofRectangle play_zone;
 	ofRectangle currently_playing_zone;
 	ofRectangle view_zone;
+
+	// Sliders for volume and song progress (public -- necessary because of click detection in ofApp)
+	ofRectangle song_slider_inner;
+	ofRectangle song_slider_outer;
+
 	// A vector of all the song entries visible on-screen at the moment 
 	// (public -- necessary because of click detection in ofApp)
 	vector<SongEntry> song_entries;
@@ -82,11 +87,13 @@ public:
 
 	void draw_currently_playing_zone(Song song, ofSoundPlayer player);
 
-	void draw_splash_screen(float time_progress);
+	void draw_columns_header();
 
 	void draw_artist_view();
 	void draw_album_view();
 	void draw_song_view();
+
+	void draw_splash_screen(float time_progress);
 
 	void scroll_up();
 	void scroll_down();
@@ -143,10 +150,6 @@ private:
 	vector<int> icon_shortcuts = { OF_KEY_LEFT, ',', ' ', ' ', '.', OF_KEY_RIGHT };
 	// End icons
 
-	// Sliders for volume and song progress
-	ofRectangle song_slider_inner;
-	ofRectangle song_slider_outer;
-
 	
 	// dummy
 	ofImage currently_playing_song_image;
@@ -174,5 +177,8 @@ private:
 };
 
 
+// Helper functions
 string get_icon_path(string icon_name);
 int get_icon_baseline(ofRectangle play_zone, ofImage icon);
+pair<int, int> convert_ms_to_min_and_sec(int milliseconds);
+string format_as_time(int minutes, int seconds);

@@ -126,24 +126,7 @@ void UI::draw_full(bool is_paused, Song song, ofSoundPlayer player) {
 	draw_currently_playing_zone(song, player);
 
 	// Draw the columns header
-	ofSetColor(cool_gray_lightest);
-	ofDrawRectangle(columns);
-
-	// Draw the column edges (separator)
-	ofSetColor(cool_gray_lighter);
-	for (auto &column_edge : columns_edges) {
-		if (column_edge != 0) ofDrawRectangle(column_edge, columns.y, columns_border_size, columns.height);
-	}
-
-	// Draw a bottom border on the columns header
-	ofSetColor(cool_gray_lighter);
-	ofDrawRectangle(columns.x, columns.y + columns.height, columns.width, columns_border_size);
-	
-	// Draw text on top of the columns header
-	ofSetColor(cool_gray_darker);
-	for (int i = 0; i < columns_entries.size(); i++) {
-		font_md.drawString(columns_entries[i], columns_edges[i] + font_md_size, columns.y + columns.height/2.0 + font_md_size/2.0);
-	}
+	draw_columns_header();
 
 	// Draw the view mode that matches view_mode
 	switch (view_mode) {
@@ -208,10 +191,14 @@ void UI::draw_currently_playing_zone(Song song, ofSoundPlayer player) {
 
 	// Draw the song information in the currently playing zone
 
+	// If the player hasn't started yet, don't show anything yet
+	if (!player.isPlaying()) return;
+
 	// Cover art
 	ofSetColor(ofColor::steelBlue);
 	currently_playing_song_image.draw(currently_playing_zone.x + padding_standard, get_icon_baseline(play_zone, currently_playing_song_image));
 
+	// Factor out this common x position of the title, album, and artist
 	int currently_playing_text_x_pos = currently_playing_zone.x + 2 * padding_standard + currently_playing_song_image.getWidth();
 
 	// Title
@@ -235,6 +222,53 @@ void UI::draw_currently_playing_zone(Song song, ofSoundPlayer player) {
 	ofSetColor(cool_gray);
 	song_slider_inner.width = song_slider_outer.width * player.getPosition();
 	ofDrawRectRounded(song_slider_inner, song_slider_inner.height / 2);
+
+	// Time progress
+	
+	pair<int, int> since_start = convert_ms_to_min_and_sec(player.getPositionMS());
+
+	// Calculate total song length
+	int song_length = player.getPositionMS() / player.getPosition();
+	// Determine the amount of time left
+	int time_left = song_length - player.getPositionMS();
+	// Convert total milliseconds to minutes and seconds
+	pair<int, int> to_end = convert_ms_to_min_and_sec(time_left);
+
+	// Format it so it's better human readable in the UI
+	string since_start_colonized =  format_as_time(since_start.first, since_start.second);
+	string to_end_colonized = "-" + format_as_time(to_end.first, to_end.second);
+
+	// Draw them on screen
+	int time_indicators_pos_y = song_slider_outer.y + song_slider_outer.height + padding_standard;
+
+	ofSetColor(cool_gray);
+	font_md.drawString(since_start_colonized, song_slider_outer.x                           - strlen(since_start_colonized.c_str())*font_md_size/3, time_indicators_pos_y);
+
+	if (time_left >= 0) // There's a problem with this showing a really large negative number at the beginning of the song, so just don't draw it in those cases
+	font_md.drawString(to_end_colonized,      song_slider_outer.x + song_slider_outer.width - strlen(since_start_colonized.c_str())*font_md_size/2, time_indicators_pos_y);
+}
+
+
+void UI::draw_columns_header() {
+	// Draw the columns header
+	ofSetColor(cool_gray_lightest);
+	ofDrawRectangle(columns);
+
+	// Draw the column edges (separator)
+	ofSetColor(cool_gray_lighter);
+	for (auto &column_edge : columns_edges) {
+		if (column_edge != 0) ofDrawRectangle(column_edge, columns.y, columns_border_size, columns.height);
+	}
+
+	// Draw a bottom border on the columns header
+	ofSetColor(cool_gray_lighter);
+	ofDrawRectangle(columns.x, columns.y + columns.height, columns.width, columns_border_size);
+
+	// Draw text on top of the columns header
+	ofSetColor(cool_gray_darker);
+	for (int i = 0; i < columns_entries.size(); i++) {
+		font_md.drawString(columns_entries[i], columns_edges[i] + font_md_size, columns.y + columns.height / 2.0 + font_md_size / 2.0);
+	}
 }
 
 
@@ -334,4 +368,22 @@ string get_icon_path(string icon_name) {
 // Returns a y coordinate for aligning the icons vertically in the center of the play zone
 int get_icon_baseline(ofRectangle play_zone, ofImage icon) {
 	return (play_zone.height - play_zone.y - icon.getHeight()) / 2 + play_zone.y;
+}
+
+
+pair<int, int> convert_ms_to_min_and_sec(int milliseconds) {
+	int total_seconds = milliseconds / 1000;
+
+	// (minutes, seconds)
+	return pair<int, int>(total_seconds / 60, total_seconds % 60);
+}
+
+
+string format_as_time(int minutes, int seconds) {
+	string seconds_as_string;
+	// Add on a zero in front if the number of seconds in a single digit
+	if (seconds < 10) seconds_as_string = "0" + to_string(seconds);
+	else seconds_as_string = to_string(seconds);
+
+	return to_string(minutes) + ":" + seconds_as_string;
 }

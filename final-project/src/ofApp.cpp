@@ -32,7 +32,7 @@ void ofApp::update(){
 	// (less than 80 milliseconds left I guess)
 	if (player.isPlaying() && player.getPosition() != 0) {
 		int song_length_ms = player.getPositionMS() / player.getPosition();
-		if (song_length_ms - player.getPositionMS() < 80) {
+		if (song_length_ms - player.getPositionMS() <= 80) {
 			cout << "next song coming up" << endl;
 			keyPressed(OF_KEY_RIGHT);
 		}
@@ -53,7 +53,10 @@ void ofApp::keyPressed(int key){
 		// When someone hits the spacebar or the play icon for the first time,
 		// nothing will be loaded. So in that case, just start playing the first
 		// song in the library.
-		if (!player.isPlaying()) start_playing(all_songs[0], 0);
+		if (!player.isPlaying()) {
+			start_playing(all_songs[0], 0);
+			return;
+		}
 
 		// Switch between playing and paused
 		is_paused = !is_paused;
@@ -108,18 +111,32 @@ void ofApp::mouseDragged(int x, int y, int button){
 void ofApp::mousePressed(int x, int y, int button){
 	// If a click is in the play zone,
 	if (ui.play_zone.inside(x, y)) {
-		// Check each icon to see if the click is inside it
-		for (auto &icons_entry : ui.icons) {
-			if (icons_entry.second.hitbox.inside(x, y)) {
-				icons_entry.second.is_active = true;
+		// And inside the currently playing zone,
+		if (ui.currently_playing_zone.inside(x, y)) {
+			// And inside the song slider,
+			if (ui.song_slider_outer.inside(x, y)) {
+				// Then update the song progress to match the click.
+				// Calculate what progress in the song this matches
+				float progress = (x - ui.song_slider_inner.x) / ui.song_slider_outer.width;
+				// And update it on the player
+				player.setPosition(progress);
+			}
+		}
+		// But if not inside the currently playing zone
+		else {
+			// Check each icon to see if the click is inside it
+			for (auto &icons_entry : ui.icons) {
+				if (icons_entry.second.hitbox.inside(x, y)) {
+					icons_entry.second.is_active = true;
 
-				// Simulate the key press the icon is a shortcut for
-				keyPressed(icons_entry.second.shortcut_key);
+					// Simulate the key press the icon is a shortcut for
+					keyPressed(icons_entry.second.shortcut_key);
 
-				// We found the one that's being pressed. Don't check any others. 
-				// Necessary to prevent double-detection of play and pause
-				// because their hitboxes overlap.
-				break;
+					// We found the one that's being pressed. Don't check any others. 
+					// Necessary to prevent double-detection of play and pause
+					// because their hitboxes overlap.
+					return;
+				}
 			}
 		}
 	} 
@@ -132,6 +149,8 @@ void ofApp::mousePressed(int x, int y, int button){
 				if (song_entry.hitbox.inside(x, y)) {
 					// And play the song if that's where the click happened
 					start_playing(song_entry.song, song_entry.index);
+					// We found it. Don't check any others.
+					return;
 				}
 			}
 		}
@@ -141,8 +160,7 @@ void ofApp::mousePressed(int x, int y, int button){
 //--------------------------------------------------------------
 void ofApp::mouseReleased(int x, int y, int button){
 	for (auto &icons_entry : ui.icons) {
-		// True when the click is inside the icon's hitbox, false otherwise
-		// (serves to reset previously clicked icons)
+		// Reset every icon to inactive
 		icons_entry.second.is_active = false;
 	}
 }
