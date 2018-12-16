@@ -114,13 +114,27 @@ void ofApp::mousePressed(int x, int y, int button){
 		// And inside the currently playing zone,
 		if (ui.currently_playing_zone.inside(x, y)) {
 			// And inside the song slider,
-			if (ui.song_slider_outer.inside(x, y)) {
+			// (but add on 6 pixels on the top and bottom to make it easier to click on)
+			ofRectangle more_generous_slider_hitbox;
+
+			more_generous_slider_hitbox.x = ui.song_slider_outer.x;
+			more_generous_slider_hitbox.width = ui.song_slider_outer.width;
+			
+			more_generous_slider_hitbox.y = ui.song_slider_outer.y - 6;
+			more_generous_slider_hitbox.height = ui.song_slider_outer.height + 12;
+			
+			if (more_generous_slider_hitbox.inside(x, y)) {
 				// Then update the song progress to match the click.
 				// Calculate what progress in the song this matches
 				float progress = (x - ui.song_slider_inner.x) / ui.song_slider_outer.width;
 				// And update it on the player
 				player.setPosition(progress);
 			}
+
+			// Either the song slider was clicked on above and it was properly handled,
+			// or nothing at all was clicked on.
+			// We're done here. Return.
+			return;
 		}
 		// But if not inside the currently playing zone
 		else {
