@@ -81,13 +81,23 @@ void UI::windowResized() {
 	currently_playing_zone.width = ofGetWidth() < 1700 ? ofGetWidth() - 400 - padding_standard : ofGetWidth() / 2;
 	currently_playing_zone.x = ofGetWidth() < 1700 ? 400 : ofGetWidth() / 2 - currently_playing_zone.width / 2;
 
+	// Make the columns header take up the entire width of the window
 	columns.width = ofGetWidth();
 
+	// Start the view zone below the columns header
 	view_zone.y = columns.y + columns.height + columns_border_size;
+	// Make it take up all the remaining space
 	view_zone.height = ofGetHeight() - view_zone.y;
+	// Make it take up the width of the whole window
 	view_zone.width = ofGetWidth();
 
+	// Recalculate the number of songs that can fit on-screen
+	// (add 1 so that one can be partially cut off at the bottom of the screen, indicating that
+	//  the user can scroll down to see more songs)
 	songs_that_can_fit_on_screen = view_zone.height / song_entry_height + 1;
+
+	// Reset the top song in the list to be certain there are no out-of-bounds errors
+	top_song_in_list = 0;
 }
 
 void UI::draw_full(bool is_paused, Song song, ofSoundPlayer player) {
@@ -239,7 +249,7 @@ void UI::draw_song_view() {
 
 	song_entries.clear();
 
-	for (int j = 0; j < songs_that_can_fit_on_screen-1; j++) {
+	for (int j = 0; j < songs_that_can_fit_on_screen; j++) {
 		int index = j + top_song_in_list;
 
 		Song this_song = (*all_songs)[index];
@@ -277,13 +287,21 @@ void UI::scroll_up() {
 	top_song_in_list -= songs_to_scroll;
 	// Ensure scrolling cannot go past the first song
 	top_song_in_list = max(top_song_in_list, 0);
+	// Undo the changes done below in `UI::scroll_down`
+	songs_that_can_fit_on_screen = view_zone.height / song_entry_height + 1;
 }
 
 
 void UI::scroll_down() {
 	top_song_in_list += songs_to_scroll;
 	// Ensure scrolling cannot go past the last song
-	top_song_in_list = min((unsigned int) top_song_in_list, all_songs->size() - songs_that_can_fit_on_screen + 1);
+	int should_be_highest_scroll = all_songs->size() - songs_that_can_fit_on_screen;
+	if (top_song_in_list > should_be_highest_scroll) {
+		top_song_in_list = should_be_highest_scroll;
+		// Since we've scrolled to the bottom, make sure there are no songs being cut off at the end.
+		// (see `UI::windowResized()` for that)
+		songs_that_can_fit_on_screen = view_zone.height / song_entry_height;
+	}
 }
 
 
