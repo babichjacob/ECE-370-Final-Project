@@ -338,7 +338,7 @@ void UI::draw_song_view() {
 		song_entries.push_back(this_song_entry);
 
 		// Zebra striping
-		ofSetColor(j % 2 == 0 ? ofColor::white : cool_gray_lightest);
+		ofSetColor(index % 2 == 0 ? ofColor::white : cool_gray_lightest);
 		ofDrawRectangle(this_song_entry.hitbox);
 
 		// Write out song info (text)
