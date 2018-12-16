@@ -64,6 +64,9 @@ void UI::setup() {
 	currently_playing_zone.y = play_zone.y + padding_standard;
 	currently_playing_zone.height = play_zone.height - padding_standard*2;
 
+	song_slider_outer.height = 6;
+	song_slider_inner.height = song_slider_outer.height;
+
 	currently_playing_song_image.resize(currently_playing_zone.height - 2 * padding_standard, currently_playing_zone.height - 2 * padding_standard);
 
 	columns.x = 0;
@@ -76,10 +79,18 @@ void UI::setup() {
 void UI::windowResized() {
 	play_zone.width = ofGetWidth();
 	
-	// Make the currently play zone take up the middle half of the screen
+	// Make the currently playing zone take up the middle half of the screen
 	// (or up to the remaining space not occupied by the icons)
 	currently_playing_zone.width = ofGetWidth() < 1700 ? ofGetWidth() - 400 - padding_standard : ofGetWidth() / 2;
 	currently_playing_zone.x = ofGetWidth() < 1700 ? 400 : ofGetWidth() / 2 - currently_playing_zone.width / 2;
+
+	// Update slider sizes and coordinates
+	song_slider_outer.x = currently_playing_zone.x + padding_left_song_slider;
+	song_slider_outer.y = currently_playing_zone.y + (currently_playing_zone.height - song_slider_outer.height)/2;
+	song_slider_outer.width = (currently_playing_zone.width + currently_playing_zone.x - song_slider_outer.x) - padding_right_song_slider;
+
+	song_slider_inner.x = song_slider_outer.x;
+	song_slider_inner.y = song_slider_outer.y;
 
 	// Make the columns header take up the entire width of the window
 	columns.width = ofGetWidth();
@@ -193,7 +204,7 @@ void UI::draw_icons(bool is_paused) {
 void UI::draw_currently_playing_zone(Song song, ofSoundPlayer player) {
 	// Draw the rounded rectangle background
 	ofSetColor(cool_gray_lighter);
-	ofDrawRectRounded(currently_playing_zone, 9);
+	ofDrawRectRounded(currently_playing_zone, currently_playing_zone_rounded_radius);
 
 	// Draw the song information in the currently playing zone
 
@@ -214,6 +225,16 @@ void UI::draw_currently_playing_zone(Song song, ofSoundPlayer player) {
 	// Artist
 	ofSetColor(cool_black);
 	font_md.drawString(song.artist, currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height - padding_standard);
+
+	// Progress slider
+	// Outer
+	ofSetColor(cool_gray_light);
+	ofDrawRectRounded(song_slider_outer, song_slider_outer.height / 2);
+
+	// Inner
+	ofSetColor(cool_gray);
+	song_slider_inner.width = song_slider_outer.width * player.getPosition();
+	ofDrawRectRounded(song_slider_inner, song_slider_inner.height / 2);
 }
 
 

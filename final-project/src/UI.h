@@ -120,6 +120,14 @@ private:
 	// The standard amount of padding inside / around elements
 	int padding_standard = 16;
 
+	// How far from the left side of the currently playing zone the song slider starts at
+	int padding_left_song_slider = 400;
+	// And how far from the right it ends
+	int padding_right_song_slider = 100;
+
+	// The radius of the rounded corners on the currently playing zone
+	int currently_playing_zone_rounded_radius = 9;
+
 	// Icons (private information before bundling)
 	// The name of each icon (also corresponds to a file in the `.MyTunes/icons` folder)
 	vector<string> icon_names = { "previous", "backward", "play", "pause", "forward", "next" };
@@ -134,6 +142,10 @@ private:
 	// What each key an icon is a shortcut for
 	vector<int> icon_shortcuts = { OF_KEY_LEFT, ',', ' ', ' ', '.', OF_KEY_RIGHT };
 	// End icons
+
+	// Sliders for volume and song progress
+	ofRectangle song_slider_inner;
+	ofRectangle song_slider_outer;
 
 	
 	// dummy
