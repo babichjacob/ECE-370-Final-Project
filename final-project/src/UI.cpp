@@ -13,7 +13,8 @@ UI::~UI()
 void UI::setup() {
 	cout << "UI::setup: " << "about to load fonts" << endl;
 	font_md.load(".MyTunes/fonts/Heebo/Heebo-Light.ttf", font_md_size);
-	font_xl.load(".MyTunes/fonts/Heebo/Heebo-Thin.ttf", font_xl_size);
+	font_lg.load(".MyTunes/fonts/Heebo/Heebo-Light.ttf", font_lg_size);
+	font_xl.load(".MyTunes/fonts/Heebo/Heebo-Thin.ttf",  font_xl_size);
 	cout << "UI::setup: " << "done loading fonts" << endl;
 
 	cout << "UI::setup: " << "about to load icons" << endl;
@@ -281,7 +282,16 @@ void UI::draw_splash_screen(float time_progress) {
 	// But show the title text in the center of the screen
 	// This text fades out faster (it feels too strong otherwise)
 	ofSetColor(cool_black, (int)(255 * pow(opacity, 5)));
-	font_xl.drawString("MyTunes", ofGetWidth() / 2 - font_xl_size * strlen("MyTunes")/2*0.9, ofGetHeight() / 2 - font_xl_size/3);
+	// More "magic" numbers that are aesthetically chosen / eyeballed
+	font_xl.drawString("MyTunes", ofGetWidth() / 2 - font_xl_size * strlen("MyTunes")/2*0.77, ofGetHeight() / 2 - font_xl_size/3);
+}
+
+
+void UI::draw_no_songs() {
+	// Inform the user there are no songs in their library
+	ofSetColor(cool_gray_dark);
+	font_lg.drawString("      There are no songs in your library.\n                                   :(\n\nPut MP3 files in the bin/data/Music folder.", 
+		               ofGetWidth()/2 - 442, ofGetHeight()/2 + 100);
 }
 
 

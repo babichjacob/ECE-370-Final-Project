@@ -99,6 +99,7 @@ public:
 	void draw_song_view();
 
 	void draw_splash_screen(float time_progress);
+	void draw_no_songs();
 
 	void scroll_up();
 	void scroll_down();
@@ -118,6 +119,9 @@ private:
 	// Fonts
 	ofTrueTypeFont font_md;
 	int font_md_size = 13;
+
+	ofTrueTypeFont font_lg;
+	int font_lg_size = 36;
 	
 	ofTrueTypeFont font_xl;
 	int font_xl_size = 96;

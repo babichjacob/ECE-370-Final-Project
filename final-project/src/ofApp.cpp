@@ -42,12 +42,18 @@ void ofApp::update(){
 //--------------------------------------------------------------
 void ofApp::draw() {
 	if (ofGetFrameNum() < 5) ui.draw_splash_screen(0);
+	else if (all_songs.size() == 0) {
+		ui.draw_splash_screen(0); 
+		ui.draw_no_songs();
+	}
 	else ui.draw_full(is_paused, all_songs[index_of_currently_playing_song], player);
-	// todo: optimize to only draw on changes
 }
 
 //--------------------------------------------------------------
 void ofApp::keyPressed(int key){
+	// Do not acknowledge any key presses if the library is empty
+	if (all_songs.size() == 0) return;
+
 	// When the spacebar is pressed,
 	if (key == ' ') {
 		// When someone hits the spacebar or the play icon for the first time,
