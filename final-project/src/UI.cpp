@@ -312,7 +312,12 @@ void UI::draw_song_view() {
 
 	song_entries.clear();
 
-	for (int j = 0; j < songs_that_can_fit_on_screen; j++) {
+	// Make sure that in small libraries, looping never exceeds the total number of songs
+	// (otherwise the program crashes)
+	int n = min((int) all_songs->size(), songs_that_can_fit_on_screen);
+
+	// Create a song entry (a bundle of related information) for every song
+	for (int j = 0; j < n; j++) {
 		int index = j + top_song_in_list;
 
 		Song this_song = (*all_songs)[index];
@@ -322,6 +327,7 @@ void UI::draw_song_view() {
 
 		this_song_entry.song = this_song;
 
+		// Hitbox / click detection
 		this_song_entry.hitbox.x = 0;
 		this_song_entry.hitbox.y = view_zone.y + j*song_entry_height;
 		this_song_entry.hitbox.height = song_entry_height;
