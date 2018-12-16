@@ -24,7 +24,8 @@ int main( ){
 
 	// Full size (not to be confused with full-screen or maximized because it is neither of these)
 	// basically it's "windowed borderless"
-	ofSetWindowShape(ofGetScreenWidth(), ofGetScreenHeight());
+	// 40 pixels have to be subtracted from the height to account for the Windows taskbar size
+	ofSetWindowShape(ofGetScreenWidth(), ofGetScreenHeight() - 40);
 
 	// this kicks off the running of my app
 	// can be OF_WINDOW or OF_FULLSCREEN
