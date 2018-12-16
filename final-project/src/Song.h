@@ -37,8 +37,11 @@ public:
 	int year;
 	// Out of order because this was added after the fact
 	string album_artist;
+	fs::path artwork_file_path;
+
 
 	fs::path music_file_path;
+
 
 	Song();
 	Song(fs::path path);

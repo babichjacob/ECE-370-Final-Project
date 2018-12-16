@@ -82,7 +82,8 @@ void Song::save_to_cache() {
 	cache_file << genre << ",";
 	cache_file << track_of_album << ",";
 	cache_file << year << ",";
-	cache_file << album_artist << endl;
+	cache_file << album_artist << ",";
+	cache_file << artwork_file_path.string() << endl;
 }
 
 
@@ -113,6 +114,7 @@ void Song::set_from_cache(fs::path path) {
 	year = stoi(parsed_csv[5]);
 	// Out of order because this was added after the fact
 	album_artist = parsed_csv[6];
+	artwork_file_path = fs::path(parsed_csv[7]);
 }
 
 
@@ -125,28 +127,33 @@ void Song::set_from_file(fs::path path) {
 
 	// Extract all the useful data (these can't all be turned into their own methods
 	// because that was giving me a null pointer exception)
+	
+	// Song title
 	ID3v2::Frame::v23::TIT2 *tit2 = dynamic_cast<ID3v2::Frame::v23::TIT2 *>(mp3_tag.GetFrameWithName("TIT2"));
 	if (tit2 != nullptr) title = get_frame_data_as_string(tit2->GetData(), tit2->GetSize());
 	else title = "Unknown Song";
 
+	// Album
 	ID3v2::Frame::v23::TALB *talb = dynamic_cast<ID3v2::Frame::v23::TALB *>(mp3_tag.GetFrameWithName("TALB"));
 	if (talb != nullptr) album = get_frame_data_as_string(talb->GetData(), talb->GetSize());
 	else album = "Unknown Album";
 
-	// Note that this is track / song artist
+	// Track / song artist
 	ID3v2::Frame::v23::TPE1 *tpe1 = dynamic_cast<ID3v2::Frame::v23::TPE1 *>(mp3_tag.GetFrameWithName("TPE1"));
 	if (tpe1 != nullptr) artist = get_frame_data_as_string(tpe1->GetData(), tpe1->GetSize());
 	else artist = "Unknown Artist";
 
-	// Note that this is album artist
+	// Album artist
 	ID3v2::Frame::v23::TPE2 *tpe2 = dynamic_cast<ID3v2::Frame::v23::TPE2 *>(mp3_tag.GetFrameWithName("TPE2"));
 	if (tpe2 != nullptr) album_artist = get_frame_data_as_string(tpe2->GetData(), tpe2->GetSize());
 	else album_artist = "Unknown Artist";
 
+	// Genre
 	ID3v2::Frame::v23::TCON *tcon = dynamic_cast<ID3v2::Frame::v23::TCON *>(mp3_tag.GetFrameWithName("TCON"));
 	if (tcon != nullptr) genre = get_frame_data_as_string(tcon->GetData(), tcon->GetSize());
 	else genre = "Unknown Genre";
 
+	// Track number of album
 	ID3v2::Frame::v23::TRCK *trck = dynamic_cast<ID3v2::Frame::v23::TRCK *>(mp3_tag.GetFrameWithName("TRCK"));
 	// It often happens that this field is something like "4/7", or it could just be "3" (for example)
 	// in other cases (both are valid) but we just want that 4 or that 3 and disregard the 7.
@@ -162,6 +169,7 @@ void Song::set_from_file(fs::path path) {
 		track_of_album = 1;
 	}
 
+	// Year
 	ID3v2::Frame::v23::TYER *tyer = dynamic_cast<ID3v2::Frame::v23::TYER *>(mp3_tag.GetFrameWithName("TYER"));
 	// See above for handling the cases where the year is missing from the data
 	try {
@@ -172,6 +180,35 @@ void Song::set_from_file(fs::path path) {
 		(void)e;
 		year = 1900;
 	}
+
+	// Cover artwork
+	ID3v2::Frame::v23::APIC *apic = dynamic_cast<ID3v2::Frame::v23::APIC *>(mp3_tag.GetFrameWithName("APIC"));
+	// Mimetype (whether it is jpg, png, ...)
+	string mimetype = apic->GetMimeType();
+
+	// Make a copy of the `music_file_path` so we don't mutate the original
+	artwork_file_path = find_cache_file_path(fs::path(music_file_path).replace_filename("artwork"));
+
+	// Determine the correct extension to match with the mimetype
+	if      (mimetype.compare("image/jpeg") == 0) artwork_file_path.replace_extension("jpeg");
+	else if (mimetype.compare("image/png")  == 0) artwork_file_path.replace_extension("png");
+	else                                          artwork_file_path.replace_extension("unknown");
+
+	// Only save the image if the file doesn't already exist
+	if (!fs::exists(artwork_file_path)) {
+		cout << "about to write out artwork file" << endl;
+
+		// Write out raw binary
+		ofstream artwork_file(artwork_file_path, ofstream::binary);
+
+		for (auto &binary_data : apic->GetPictureData()) {
+			artwork_file.write((char *) &binary_data, sizeof(binary_data));
+		}
+
+		artwork_file.close();
+		cout << "successfully wrote out artwork file" << endl;
+	}
+	cout << artwork_file_path.string() << endl;
 }
 
 void Song::print() {

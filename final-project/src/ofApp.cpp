@@ -221,6 +221,10 @@ void ofApp::start_playing(Song song, int song_index) {
 
 	index_of_currently_playing_song = song_index;
 
+	// Load the artwork into the image
+	ui.currently_playing_song_image.load(song.artwork_file_path.string());
+	ui.resize_artwork();
+
 	is_paused = false;
 	player.setPaused(false);
 	// The second parameter determines whether or not the player can stream directly from the file

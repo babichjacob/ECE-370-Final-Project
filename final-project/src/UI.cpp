@@ -53,9 +53,6 @@ void UI::setup() {
 	// Song view by default
 	view_mode = view_song;
 
-	// dummy
-	currently_playing_song_image.load(".MyTunes/icons/image.png");
-
 	// All constant values in UI elements
 	play_zone.x = 0;
 	play_zone.y = 0;
@@ -66,8 +63,6 @@ void UI::setup() {
 
 	song_slider_outer.height = 6;
 	song_slider_inner.height = song_slider_outer.height;
-
-	currently_playing_song_image.resize(currently_playing_zone.height - 2 * padding_standard, currently_playing_zone.height - 2 * padding_standard);
 
 	columns.x = 0;
 	columns.y = play_zone.y+play_zone.height;
@@ -183,6 +178,10 @@ void UI::draw_icons(bool is_paused) {
 	}
 }
 
+void UI::resize_artwork() {
+	currently_playing_song_image.resize(currently_playing_zone.height - 2 * padding_standard, currently_playing_zone.height - 2 * padding_standard);
+}
+
 
 void UI::draw_currently_playing_zone(Song song, ofSoundPlayer player) {
 	// Draw the rounded rectangle background
@@ -195,7 +194,6 @@ void UI::draw_currently_playing_zone(Song song, ofSoundPlayer player) {
 	if (!player.isPlaying()) return;
 
 	// Cover art
-	ofSetColor(ofColor::steelBlue);
 	currently_playing_song_image.draw(currently_playing_zone.x + padding_standard, get_icon_baseline(play_zone, currently_playing_song_image));
 
 	// Factor out this common x position of the title, album, and artist
@@ -283,7 +281,7 @@ void UI::draw_splash_screen(float time_progress) {
 	// But show the title text in the center of the screen
 	// This text fades out faster (it feels too strong otherwise)
 	ofSetColor(cool_black, (int)(255 * pow(opacity, 5)));
-	font_xl.drawString("MyTunes", ofGetWidth() / 2 - font_xl_size * strlen("MyTunes")/2, ofGetHeight() / 2 - font_xl_size/3);
+	font_xl.drawString("MyTunes", ofGetWidth() / 2 - font_xl_size * strlen("MyTunes")/2*0.9, ofGetHeight() / 2 - font_xl_size/3);
 }
 
 

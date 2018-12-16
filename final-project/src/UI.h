@@ -74,6 +74,9 @@ public:
 	// (public -- necessary because of click detection in ofApp)
 	vector<SongEntry> song_entries;
 
+	// The image element for the currently playing song's artwork
+	ofImage currently_playing_song_image;
+
 
 	UI();
 	~UI();
@@ -84,6 +87,8 @@ public:
 
 	void draw_play_zone();
 	void draw_icons(bool is_paused);
+
+	void resize_artwork();
 
 	void draw_currently_playing_zone(Song song, ofSoundPlayer player);
 
@@ -150,11 +155,6 @@ private:
 	// What each key an icon is a shortcut for
 	vector<int> icon_shortcuts = { OF_KEY_LEFT, ',', ' ', ' ', '.', OF_KEY_RIGHT };
 	// End icons
-
-	
-	// dummy
-	ofImage currently_playing_song_image;
-	// end dummy
 
 	// Columns
 	ofRectangle columns;
