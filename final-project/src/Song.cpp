@@ -198,17 +198,24 @@ void Song::set_from_file(fs::path path) {
 	if (!fs::exists(artwork_file_path)) {
 		cout << "about to write out artwork file" << endl;
 
-		// Write out raw binary
-		ofstream artwork_file(artwork_file_path, ofstream::binary);
+		// Create the folder so that ofstream actually works
+		fs::create_directories(artwork_file_path.parent_path());
 
-		for (auto &binary_data : apic->GetPictureData()) {
+		// Write out raw binary
+		ofstream artwork_file(artwork_file_path.string(), ofstream::binary);
+
+		vector<uint8_t> all_binary_data = apic->GetPictureData();
+
+		cout << "about to write out " << sizeof(uint8_t)*all_binary_data.size() << " bytes" << endl;
+
+		for (auto &binary_data : all_binary_data) {
 			artwork_file.write((char *) &binary_data, sizeof(binary_data));
 		}
 
 		artwork_file.close();
-		cout << "successfully wrote out artwork file" << endl;
+		cout << "successfully wrote out artwork file " << artwork_file_path.string() << endl << endl;
 	}
-	cout << artwork_file_path.string() << endl;
+	else cout << "didn't need to write out artwork file -- it's already there " << artwork_file_path.string() << endl << endl;
 }
 
 void Song::print() {
