@@ -70,6 +70,9 @@ public:
 	ofRectangle song_slider_inner;
 	ofRectangle song_slider_outer;
 
+	ofRectangle volume_slider_inner;
+	ofRectangle volume_slider_outer;
+
 	// A vector of all the song entries visible on-screen at the moment 
 	// (public -- necessary because of click detection in ofApp)
 	vector<SongEntry> song_entries;
@@ -87,7 +90,8 @@ public:
 
 	void draw_play_zone();
 	void draw_icons(bool is_paused);
-
+	void draw_volume_slider(ofSoundPlayer player);
+	
 	void resize_artwork();
 
 	void draw_currently_playing_zone(Song song, ofSoundPlayer player);

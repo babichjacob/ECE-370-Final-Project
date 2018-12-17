@@ -15,7 +15,7 @@ void ofApp::update(){
 	// open and available (otherwise it'll be confusing to the user why
 	// their program isn't opening when it's loading)
 	// Also, the first 4 frames have to be skipped because those never get painted on screen for some reason
-	// (I think the window isn't visible until the 5th frame)
+	// (I think the window isn't visible until the 5th frame, at least on Windows 10)
 	if (ofGetFrameNum() == 4) {
 		all_songs = find_all_songs();
 		albums_map = build_albums(all_songs);
@@ -96,6 +96,27 @@ void ofApp::keyPressed(int key){
 		int song_length_ms = round(player.getPositionMS() / player.getPosition());
 		player.setPositionMS(min(song_length_ms, player.getPositionMS() + skip_time * 1000));
 	}
+	// When the down arrow is pressed,
+	if (key == OF_KEY_DOWN) {
+		// Scroll down
+		ui.scroll_down();
+	}
+	// When the up arrow is pressed,
+	if (key == OF_KEY_UP) {
+		// Scroll up
+		ui.scroll_up();
+	}
+	// When the - key is pressed,
+	if (key == '-') {
+		// Lower the volume (without going past zero)
+		player.setVolume(max(0.0F, player.getVolume() - 0.1F));
+	}
+	// When the + key (shared with =) is pressed,
+	if (key == '=') {
+		// Increase the volume (without going past 1)
+		player.setVolume(min(1.0F, player.getVolume() + 0.1F));
+	}
+
 }
 
 //--------------------------------------------------------------
@@ -132,7 +153,7 @@ void ofApp::mousePressed(int x, int y, int button){
 			if (more_generous_slider_hitbox.inside(x, y)) {
 				// Then update the song progress to match the click.
 				// Calculate what progress in the song this matches
-				float progress = (x - ui.song_slider_inner.x) / ui.song_slider_outer.width;
+				float progress = (x - ui.song_slider_outer.x) / ui.song_slider_outer.width;
 				// And update it on the player
 				player.setPosition(progress);
 			}
@@ -144,6 +165,25 @@ void ofApp::mousePressed(int x, int y, int button){
 		}
 		// But if not inside the currently playing zone
 		else {
+			// Check if it's within the volume slider
+			// (but add on 6 pixels on the left and right to make it easier to click on)
+			ofRectangle more_generous_slider_hitbox;
+
+			more_generous_slider_hitbox.y = ui.volume_slider_outer.y;
+			more_generous_slider_hitbox.height = ui.volume_slider_outer.height;
+
+			more_generous_slider_hitbox.x = ui.volume_slider_outer.x - 6;
+			more_generous_slider_hitbox.width = ui.volume_slider_outer.width + 12;
+
+			if (more_generous_slider_hitbox.inside(x, y)) {
+				// Then update the volume to match the click.
+				float volume = (ui.volume_slider_outer.y + ui.volume_slider_outer.height - y) / ui.volume_slider_outer.height;
+
+				cout << "setting volume to " << volume << endl;
+				// And update it on the player
+				player.setVolume(volume);
+			}
+
 			// Check each icon to see if the click is inside it
 			for (auto &icons_entry : ui.icons) {
 				if (icons_entry.second.hitbox.inside(x, y)) {
@@ -198,11 +238,9 @@ void ofApp::mouseExited(int x, int y){
 void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
 	if (scrollY == +1) {
 		ui.scroll_up();
-		ui.draw_song_view();
 	}
 	else if (scrollY == -1) {
 		ui.scroll_down();
-		ui.draw_song_view();
 	}
 }
 

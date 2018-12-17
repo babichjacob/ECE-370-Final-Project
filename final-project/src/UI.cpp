@@ -62,8 +62,18 @@ void UI::setup() {
 	currently_playing_zone.y = play_zone.y + padding_standard;
 	currently_playing_zone.height = play_zone.height - padding_standard*2;
 
-	song_slider_outer.height = 6;
+	song_slider_outer.height = 5;
 	song_slider_inner.height = song_slider_outer.height;
+
+	volume_slider_outer.width = 5;
+	volume_slider_inner.width = volume_slider_outer.width;
+
+	volume_slider_outer.height = play_zone.height - 3.5*padding_standard;
+	volume_slider_outer.y = play_zone.y + 1.75*padding_standard;
+	volume_slider_outer.x = 418;
+
+	volume_slider_inner.x = volume_slider_outer.x;
+
 
 	columns.x = 0;
 	columns.y = play_zone.y+play_zone.height;
@@ -75,10 +85,13 @@ void UI::setup() {
 void UI::windowResized() {
 	play_zone.width = ofGetWidth();
 	
-	// Make the currently playing zone take up the middle half of the screen
-	// (or up to the remaining space not occupied by the icons)
-	currently_playing_zone.width = ofGetWidth() < 1700 ? ofGetWidth() - 400 - padding_standard : ofGetWidth() / 2;
-	currently_playing_zone.x = ofGetWidth() < 1700 ? 400 : ofGetWidth() / 2 - currently_playing_zone.width / 2;
+	// Make the currently playing zone take up the remaining space not occupied by the icons
+	// (but no more than half the screen on big screens)
+	currently_playing_zone.x = 510;
+	currently_playing_zone.width = ofGetWidth() - currently_playing_zone.x - padding_standard;
+	if (ofGetWidth() > 1300) currently_playing_zone.width = ofGetWidth() / 2;
+
+
 
 	// Update slider sizes and coordinates
 	song_slider_outer.x = currently_playing_zone.x + padding_left_song_slider;
@@ -118,6 +131,9 @@ void UI::draw_full(bool is_paused, Song song, ofSoundPlayer player) {
 	// Draw icons in the play zone
 	draw_icons(is_paused);
 
+	// Draw the volume slider
+	draw_volume_slider(player);
+
 	// Draw the currently playing zone
 	draw_currently_playing_zone(song, player);
 
@@ -154,23 +170,26 @@ void UI::draw_play_zone() {
 void UI::draw_icons(bool is_paused) {
 	// Draw icons in the play zone
 	for (auto &icon_name_and_bundle : icons) {
+		// Only display the play icon when paused
 		if (icon_name_and_bundle.first == "play") {
 			if (!is_paused) continue;
 		}
+		// Only display the pause icon when playing
 		else if (icon_name_and_bundle.first == "pause") {
 			if (is_paused) continue;
 		}
 
+		// Vertically align the icon
 		icon_name_and_bundle.second.hitbox.y = get_icon_baseline(play_zone, icon_name_and_bundle.second.icon);
 
-		// If the icon is being actively pressed (see ofApp::mousePressed)
+		// If the icon is being actively pressed (see ofApp::mousePressed),
 		if (icon_name_and_bundle.second.is_active) {
 			// Then show the active color instead
 			ofSetColor(icon_name_and_bundle.second.color_active);
 		}
 		// Otherwise,
 		else {
-			// show the inactive color
+			// Show the inactive color
 			ofSetColor(icon_name_and_bundle.second.color_inactive);
 		}
 
@@ -178,6 +197,23 @@ void UI::draw_icons(bool is_paused) {
 		icon_name_and_bundle.second.icon.draw(icon_name_and_bundle.second.hitbox.x, icon_name_and_bundle.second.hitbox.y);
 	}
 }
+
+
+void UI::draw_volume_slider(ofSoundPlayer player) {
+	// Outer
+	ofSetColor(cool_gray_dark);
+	ofDrawRectRounded(volume_slider_outer, volume_slider_outer.width/2);
+
+	// Inner
+	volume_slider_inner.height = volume_slider_outer.height * player.getVolume();
+	// Pin the bottom of the volume slider inner to the outer (the way we are used to volume sliders working)
+	volume_slider_inner.y = volume_slider_outer.y + volume_slider_outer.height - volume_slider_inner.height;
+
+	ofSetColor(cool_gray_darkest);
+	ofDrawRectRounded(volume_slider_inner, volume_slider_inner.width/2);
+}
+
+
 
 void UI::resize_artwork() {
 	currently_playing_song_image.resize(currently_playing_zone.height - 2 * padding_standard, currently_playing_zone.height - 2 * padding_standard);
@@ -206,7 +242,8 @@ void UI::draw_currently_playing_zone(Song song, ofSoundPlayer player) {
 
 	// Album
 	ofSetColor(cool_gray_darker);
-	font_md.drawString(song.album,  currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height / 2 + font_md_size / 2);
+	// (+1 on the y for aesthetic reasons)
+	font_md.drawString(song.album,  currently_playing_text_x_pos, 1+ currently_playing_zone.y + currently_playing_zone.height / 2 + font_md_size / 2);
 
 	// Artist
 	ofSetColor(cool_black);
@@ -358,6 +395,9 @@ void UI::scroll_up() {
 	top_song_in_list = max(top_song_in_list, 0);
 	// Undo the changes done below in `UI::scroll_down`
 	songs_that_can_fit_on_screen = view_zone.height / song_entry_height + 1;
+
+	// Re-draw the song view
+	draw_song_view();
 }
 
 
@@ -371,6 +411,9 @@ void UI::scroll_down() {
 		// (see `UI::windowResized()` for that)
 		songs_that_can_fit_on_screen = view_zone.height / song_entry_height;
 	}
+
+	// Re-draw the song view
+	draw_song_view();
 }
 
 
