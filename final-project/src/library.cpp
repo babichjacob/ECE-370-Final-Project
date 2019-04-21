@@ -23,19 +23,17 @@ bool find_all_songs_incrementally(Songs* previous_effort, fs::recursive_director
 	while (true) {
 		(*music_directory)++;
 
+		// Quit when the iterator is exhausted
 		if (*music_directory == end_iterator) return false;
 
+		// Get the path the iterator currently points to
 		fs::directory_entry path = **music_directory;
 
-		if (fs::is_directory(path)) {
-			cout << "mp3_main: found a directory -- skipping (but will check its contents)" << endl;
+		// Skip directories
+		if (fs::is_directory(path)) continue;
 
-			continue;
-		}
-
+		// Check files
 		if (fs::is_regular_file(path)) {
-			cout << "mp3_main: found a regular file -- let's see if we can find mp3 information in it" << endl;
-
 			try {
 				Song song(path.path());
 
@@ -57,38 +55,6 @@ bool find_all_songs_incrementally(Songs* previous_effort, fs::recursive_director
 		}
 	}
 }
-
-
-//Songs find_all_songs() {
-//	fs::recursive_directory_iterator music_directory = fs::recursive_directory_iterator(MUSIC_DIR);
-//	Songs all_songs;
-//	
-//	// This is a foreach loop (much more modern than for loops)
-//	for (auto &path : music_directory) {
-//		if (fs::is_directory(path)) {
-//			cout << "mp3_main: found a directory -- skipping (but will check its contents)" << endl;
-//			continue;
-//		}
-//		else if (fs::is_regular_file(path)) {
-//			cout << "mp3_main: found a regular file -- let's see if we can find mp3 information in it" << endl;
-//
-//			try {
-//				Song song(path.path());
-//
-//				// The runtime_error thrown in the constructor above will prevent every line from here on from executing
-//				// if Song object creation failed
-//				// in other words, this code will only execute for valid songs (MP3 files)
-//				all_songs.push_back(song);
-//			}
-//			catch (runtime_error &e) {
-//				// Just move on
-//				(void)e;
-//			}
-//		}
-//	}
-//
-//	return all_songs;
-//}
 
 
 Albums build_albums(Songs songs) {
@@ -178,7 +144,7 @@ void sort_songs(Songs* songs, vector<string> by) {
 	for (auto it = by.rbegin(); it != by.rend(); it++) {
 		string key = *it;
 
-		auto comparator = [&key](const auto & left, const auto & right) {
+		auto comparator = [&key](const auto& left, const auto& right) {
 			if (key == "album_artist") {
 				return left.album_artist < right.album_artist;
 			}

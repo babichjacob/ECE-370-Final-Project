@@ -13,7 +13,6 @@ using std::vector;
 namespace fs = std::experimental::filesystem;
 
 bool find_all_songs_incrementally(Songs* previous_effort, fs::recursive_directory_iterator* music_directory, int* index);
-//Songs find_all_songs();
 Albums build_albums(Songs songs);
 Artists build_artists(Albums albums);
 
