@@ -4,6 +4,7 @@
 #include "Artist.h"
 #include "library.h"
 #include "ofMain.h"
+#include "preferences.h"
 #include "Song.h"
 #include "UI.h"
 
@@ -22,6 +23,7 @@ class ofApp : public ofBaseApp{
 	// How much time is skipped by a forward or rewind
 	int skip_time = 10;
 
+	Preferences preferences;
 
 	Songs all_songs;
 	Albums albums_map;

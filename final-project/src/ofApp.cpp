@@ -6,6 +6,10 @@ void ofApp::setup(){
 	ofSetFrameRate(60);
 	ofSetBackgroundAuto(false);
 
+	preferences = preferences_init();
+	// Set the player volume to the user's preferred volume, or 0.875 if they haven't picked one yet
+	player.setVolume(stof(preferences_get(preferences, "volume", "0.875")));
+
 	ui.setup();
 }
 
@@ -33,6 +37,8 @@ void ofApp::update(){
 	if (player.isPlaying() && player.getPosition() != 0) {
 		int song_length_ms = round(player.getPositionMS() / player.getPosition());
 		if (song_length_ms - player.getPositionMS() <= 80) {
+			// When the song finishes, add 1 to its play count
+			all_songs[index_of_currently_playing_song].increment_plays();
 			cout << "next song coming up" << endl;
 			keyPressed(OF_KEY_RIGHT);
 		}
@@ -80,9 +86,9 @@ void ofApp::keyPressed(int key){
 	// When the right arrow is pressed,
 	if (key == OF_KEY_RIGHT) {
 		// Go forward a song
-		int next_index = index_of_currently_playing_song + 1;
+		unsigned int next_index = index_of_currently_playing_song + 1;
 		// Or loop around to the first song in the library
-		if (next_index >= all_songs.size()) next_index = 0;
+		if (next_index >= static_cast<unsigned int>(all_songs.size())) next_index = 0;
 		start_playing(all_songs[next_index], next_index);
 	}
 	// When the comma key is pressed,
@@ -179,9 +185,11 @@ void ofApp::mousePressed(int x, int y, int button){
 				// Then update the volume to match the click.
 				float volume = (ui.volume_slider_outer.y + ui.volume_slider_outer.height - y) / ui.volume_slider_outer.height;
 
-				cout << "setting volume to " << volume << endl;
 				// And update it on the player
 				player.setVolume(volume);
+
+				// And the preferences
+				preferences_set(preferences, "volume", to_string(volume));
 			}
 
 			// Check each icon to see if the click is inside it
@@ -208,7 +216,7 @@ void ofApp::mousePressed(int x, int y, int button){
 			for (auto &song_entry : ui.song_entries) {
 				if (song_entry.hitbox.inside(x, y)) {
 					// And play the song if that's where the click happened
-					start_playing(song_entry.song, song_entry.index);
+					start_playing(song_entry.media, song_entry.index);
 					// We found it. Don't check any others.
 					return;
 				}
