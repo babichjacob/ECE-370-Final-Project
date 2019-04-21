@@ -14,6 +14,12 @@ class ofApp : public ofBaseApp{
 
 	ofSoundPlayer player;
 
+	fs::recursive_directory_iterator music_directory;
+
+	// True until songs are done loading in
+	bool is_loading = true;
+	int loaded_index = 0;
+
 	// As crazy as it sounds, ofSoundPlayer cannot / does not keep track 
 	// of whether or not it's paused
 	bool is_paused = true;

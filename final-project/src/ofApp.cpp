@@ -21,11 +21,17 @@ void ofApp::update(){
 	// Also, the first 4 frames have to be skipped because those never get painted on screen for some reason
 	// (I think the window isn't visible until the 5th frame, at least on Windows 10)
 	if (ofGetFrameNum() == 4) {
-		all_songs = find_all_songs();
+		music_directory = fs::recursive_directory_iterator(MUSIC_DIR);
+		is_loading = find_all_songs_incrementally(&all_songs, &music_directory, &loaded_index);
+		ui.frame_loaded = ofGetFrameNum();
+
+	} else if (is_loading && ofGetFrameNum() > 4) {
+		is_loading = find_all_songs_incrementally(&all_songs, &music_directory, &loaded_index);
+
 		albums_map = build_albums(all_songs);
 		artists_map = build_artists(albums_map);
-		all_songs = rebuild_songs(artists_map, all_songs.size());
-		ui.frame_loaded = ofGetFrameNum();
+		//all_songs = rebuild_songs(artists_map, all_songs.size());
+		sort_songs(&all_songs, { "plays" });
 
 		ui.all_songs = &all_songs;
 		ui.albums_map = &albums_map;
@@ -214,9 +220,12 @@ void ofApp::mousePressed(int x, int y, int button){
 		if (ui.view_mode == view_song) {
 			// Then check each song entry for a click
 			for (auto &song_entry : ui.song_entries) {
+				// And if that's where the click happened
 				if (song_entry.hitbox.inside(x, y)) {
-					// And play the song if that's where the click happened
-					start_playing(song_entry.media, song_entry.index);
+					// Either toggle that song being favorited
+					if (x <= song_entry.is_favorited_x_limit) song_entry.media.toggle_favorited();
+					// or play the song
+					else start_playing(song_entry.media, song_entry.index);
 					// We found it. Don't check any others.
 					return;
 				}

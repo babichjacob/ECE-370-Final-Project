@@ -380,6 +380,9 @@ void UI::draw_song_view() {
 		this_song_entry.hitbox.height = song_entry_height;
 		this_song_entry.hitbox.width = ofGetWidth();
 
+		// Favorite hitbox
+		this_song_entry.is_favorited_x_limit = columns_edges[1];
+
 
 		// Add the song entry to the list of song entries
 		song_entries.push_back(this_song_entry);
