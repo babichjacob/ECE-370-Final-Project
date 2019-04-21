@@ -197,6 +197,7 @@
     <ClCompile Include="src\library.cpp" />
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
+    <ClCompile Include="src\preferences.cpp" />
     <ClCompile Include="src\Song.cpp" />
     <ClCompile Include="src\UI.cpp" />
   </ItemGroup>
@@ -218,6 +219,7 @@
     <ClInclude Include="src\csv.h" />
     <ClInclude Include="src\library.h" />
     <ClInclude Include="src\ofApp.h" />
+    <ClInclude Include="src\preferences.h" />
     <ClInclude Include="src\Song.h" />
     <ClInclude Include="src\UI.h" />
   </ItemGroup>
