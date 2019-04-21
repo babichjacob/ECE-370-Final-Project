@@ -1,4 +1,4 @@
-#include "UI.h"
+﻿#include "UI.h"
 
 
 UI::UI()
@@ -18,6 +18,11 @@ void UI::setup() {
 
 	ofTrueTypeFontSettings font_md_unicode_settings(".MyTunes/fonts/Noto/NotoSans-Light.ttf", font_md_unicode_size);
 	font_md_unicode_settings.antialiased = true;
+	font_md_unicode_settings.ranges ={
+			ofUnicode::AdditionalEmoticons,
+			ofUnicode::Arrows,
+			ofUnicode::Emoticons
+		};
 	font_md_unicode.load(font_md_unicode_settings);
 	cout << "UI::setup: " << "done loading fonts" << endl;
 
@@ -390,7 +395,8 @@ void UI::draw_song_view() {
 		// Write out song info (text)
 
 		ofSetColor(this_song.is_favorited ? cool_gray_darkest : cool_gray);
-		font_md_unicode.drawString(this_song.is_favorited ? "\xE2\x9D\xA4" : "\xE2\x9D\xA4", columns_edges[0] + font_md_unicode_size, this_song_entry.hitbox.y + font_md_unicode_size + padding_song_entry);
+		cout << " heart: \xE2\x9D\xA4 ❤️ <--";
+		font_md_unicode.drawString(this_song.is_favorited ? "❤️ \xE2\x9D\xA4" : "❤️ \xE2\x9D\xA4", columns_edges[0] + font_md_unicode_size, this_song_entry.hitbox.y + font_md_unicode_size + padding_song_entry);
 		
 		ofSetColor(cool_gray_darkest);
 		font_md.drawString(this_song.title,                    columns_edges[1] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
