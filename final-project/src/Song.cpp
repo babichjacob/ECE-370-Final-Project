@@ -251,3 +251,8 @@ void Song::increment_plays() {
 	// Update the cache
 	save_to_cache();
 }
+
+void Song::toggle_favorited() {
+	is_favorited = !is_favorited;
+	save_to_cache();
+}

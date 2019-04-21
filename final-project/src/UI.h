@@ -42,6 +42,9 @@ struct MediaEntry {
 	int index;
 	T media;
 	ofRectangle hitbox;
+
+	// Specific to songs
+	int is_favorited_x_limit;
 };
 
 
@@ -136,8 +139,8 @@ private:
 	// End fonts
 
 	// How long the fade-in animation will last
-	// 45 frames / 60 frames per second = 0.75 seconds
-	int transition_duration_frames = 45;
+	// 30 frames / 60 frames per second = 0.5 seconds
+	int transition_duration_frames = 30;
 
 	// How many songs are scrolled into / out of view when scrolling
 	int songs_to_scroll = 5;

@@ -84,7 +84,7 @@ void Album::print() {
 	cout << endl;
 
 	// Track listing
-	for (int i = 0; i < songs.size(); i++) {
+	for (int i = 0, n = songs.size(); i < n; i++) {
 		cout << " " << i + 1 << ". " << songs[i].title << endl;
 	}
 

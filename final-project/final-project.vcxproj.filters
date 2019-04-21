@@ -46,6 +46,9 @@
     <ClCompile Include="src\Song.cpp">
       <Filter>src</Filter>
     </ClCompile>
+    <ClCompile Include="src\csv.cpp">
+      <Filter>src</Filter>
+    </ClCompile>
     <ClCompile Include="src\Album.cpp">
       <Filter>src</Filter>
     </ClCompile>
@@ -53,9 +56,6 @@
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\library.cpp">
-      <Filter>src</Filter>
-    </ClCompile>
-    <ClCompile Include="src\csv.cpp">
       <Filter>src</Filter>
     </ClCompile>
     <ClCompile Include="src\preferences.cpp">

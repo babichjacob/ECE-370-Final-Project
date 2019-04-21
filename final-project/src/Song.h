@@ -42,6 +42,7 @@ public:
 	~Song();
 	void print();
 	void increment_plays();
+	void toggle_favorited();
 };
 
 typedef vector<Song> Songs;
