@@ -23,8 +23,9 @@ void UI::setup() {
 
 	cout << "UI::setup: " << "about to load icons" << endl;
 
+	
 	// Create IconBundles for all the icons we need
-	for (int i = 0; i < icon_names.size(); i++) {
+	for (int i = 0, n = icon_names.size(); i < n; i++) {
 		string icon_name = icon_names[i];
 
 		IconBundle this_icon_bundle;
@@ -306,7 +307,7 @@ void UI::draw_columns_header() {
 
 	// Draw text on top of the columns header
 	ofSetColor(cool_gray_darker);
-	for (int i = 0; i < columns_entries.size(); i++) {
+	for (int i = 0, n = columns_entries.size(); i < n; i++) {
 		font_md.drawString(columns_entries[i], columns_edges[i] + font_md_size, columns.y + columns.height / 2.0 + font_md_size / 2.0);
 	}
 }
