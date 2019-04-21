@@ -15,6 +15,10 @@ void UI::setup() {
 	font_md.load(".MyTunes/fonts/Heebo/Heebo-Light.ttf", font_md_size);
 	font_lg.load(".MyTunes/fonts/Heebo/Heebo-Light.ttf", font_lg_size);
 	font_xl.load(".MyTunes/fonts/Heebo/Heebo-Thin.ttf",  font_xl_size);
+
+	ofTrueTypeFontSettings font_md_unicode_settings(".MyTunes/fonts/Noto/NotoSans-Light.ttf", font_md_unicode_size);
+	font_md_unicode_settings.antialiased = true;
+	font_md_unicode.load(font_md_unicode_settings);
 	cout << "UI::setup: " << "done loading fonts" << endl;
 
 	cout << "UI::setup: " << "about to load icons" << endl;
@@ -320,7 +324,7 @@ void UI::draw_splash_screen(float time_progress) {
 	// This text fades out faster (it feels too strong otherwise)
 	ofSetColor(cool_black, (int)(255 * pow(opacity, 5)));
 	// More "magic" numbers that are aesthetically chosen / eyeballed
-	font_xl.drawString("MyTunes", ofGetWidth() / 2 - font_xl_size * strlen("MyTunes")/2*0.77, ofGetHeight() / 2 - font_xl_size/3);
+	font_xl.drawString("MyTunes 2", ofGetWidth() / 2 - font_xl_size * strlen("MyTunes 2")/2*0.77, ofGetHeight() / 2 - font_xl_size/3);
 }
 
 
@@ -338,6 +342,11 @@ void UI::draw_artist_view() {
 
 
 void UI::draw_album_view() {
+	// Clear the view zone
+	ofSetColor(ofGetBackgroundColor());
+	ofDrawRectangle(view_zone);
+
+	song_entries.clear();
 	// todo
 }
 
@@ -358,11 +367,11 @@ void UI::draw_song_view() {
 		int index = j + top_song_in_list;
 
 		Song this_song = (*all_songs)[index];
-		SongEntry this_song_entry;
+		MediaEntry<Song> this_song_entry;
 
 		this_song_entry.index = index;
 
-		this_song_entry.song = this_song;
+		this_song_entry.media = this_song;
 
 		// Hitbox / click detection
 		this_song_entry.hitbox.x = 0;
@@ -379,12 +388,21 @@ void UI::draw_song_view() {
 		ofDrawRectangle(this_song_entry.hitbox);
 
 		// Write out song info (text)
+
+		ofSetColor(this_song.is_favorited ? cool_gray_darkest : cool_gray);
+		font_md_unicode.drawString(this_song.is_favorited ? "\xE2\x9D\xA4" : "\xE2\x9D\xA4", columns_edges[0] + font_md_unicode_size, this_song_entry.hitbox.y + font_md_unicode_size + padding_song_entry);
+		
 		ofSetColor(cool_gray_darkest);
-		font_md.drawString(this_song.title,             columns_edges[0] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
-		font_md.drawString(this_song.album,             columns_edges[1] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
-		font_md.drawString(this_song.artist,            columns_edges[2] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
-		font_md.drawString(this_song.genre,             columns_edges[3] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
-		font_md.drawString(to_string(this_song.year),   columns_edges[4] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		font_md.drawString(this_song.title,                    columns_edges[1] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		font_md.drawString(this_song.album,                    columns_edges[2] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		font_md.drawString(this_song.artist,                   columns_edges[3] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		font_md.drawString(this_song.genre,                    columns_edges[4] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		font_md.drawString(to_string(this_song.year),          columns_edges[5] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		
+		// Only show the plays if the song has been played before
+		if (this_song.plays > 0) {
+			font_md.drawString(to_string(this_song.plays), columns_edges[6] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		}
 	}
 }
 

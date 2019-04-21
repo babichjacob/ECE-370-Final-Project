@@ -37,13 +37,12 @@ struct IconBundle {
 typedef struct IconBundle IconBundle;
 
 
-struct SongEntry {
+template <class T>
+struct MediaEntry {
 	int index;
-	Song song;
+	T media;
 	ofRectangle hitbox;
 };
-
-typedef struct SongEntry SongEntry;
 
 
 class UI
@@ -73,9 +72,11 @@ public:
 	ofRectangle volume_slider_inner;
 	ofRectangle volume_slider_outer;
 
-	// A vector of all the song entries visible on-screen at the moment 
+	// A vector of all the song, album, or artist entries visible on-screen at the moment 
 	// (public -- necessary because of click detection in ofApp)
-	vector<SongEntry> song_entries;
+	vector<MediaEntry<Song>> song_entries;
+	vector<MediaEntry<Album>> album_entries;
+	vector<MediaEntry<Artist>> artist_entries;
 
 	// The image element for the currently playing song's artwork
 	ofImage currently_playing_song_image;
@@ -129,6 +130,9 @@ private:
 	
 	ofTrueTypeFont font_xl;
 	int font_xl_size = 96;
+
+	ofTrueTypeFont font_md_unicode;
+	int font_md_unicode_size = 13;
 	// End fonts
 
 	// How long the fade-in animation will last
@@ -166,8 +170,8 @@ private:
 
 	// Columns
 	ofRectangle columns;
-	vector<string> columns_entries = {"Song Name", "Album", "Artist", "Genre", "Year"};
-	vector<int> columns_edges = {0, 550, 950, 1350, 1600};
+	vector<string> columns_entries = {"", "Song Name", "Album", "Artist", "Genre", "Year", "Plays"};
+	vector<int> columns_edges = {0, 24, 570, 970, 1370, 1620, 1700};
 	int columns_border_size = 2;
 	// End columns
 
