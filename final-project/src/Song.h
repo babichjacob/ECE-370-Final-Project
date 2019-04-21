@@ -1,7 +1,6 @@
 #pragma once
 
 #include <filesystem>
-#include <fstream>
 
 #include "csv.h"
 #include "ID3v2.h"
@@ -10,13 +9,6 @@ constexpr auto MUSIC_DIR = "bin/data/music";
 constexpr auto CACHE_DIR = "bin/data/.MyTunes/cache";
 
 namespace fs = std::experimental::filesystem;
-
-using std::cout;
-using std::endl;
-using std::ifstream;
-using std::invalid_argument;
-using std::ofstream;
-using std::runtime_error;
 
 class Song
 {
@@ -35,9 +27,11 @@ public:
 	// Ex 4 (out of the total number of songs in the album)
 	int track_of_album;
 	int year;
-	// Out of order because this was added after the fact
+	// Out of order because these were added after the fact
 	string album_artist;
 	fs::path artwork_file_path;
+	bool is_favorited;
+	int plays;
 
 
 	fs::path music_file_path;
@@ -47,6 +41,7 @@ public:
 	Song(fs::path path);
 	~Song();
 	void print();
+	void increment_plays();
 };
 
 typedef vector<Song> Songs;

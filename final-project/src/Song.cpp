@@ -1,5 +1,17 @@
 #include "Song.h"
 
+#include <fstream>
+#include <string>
+
+
+using std::cout;
+using std::endl;
+using std::ifstream;
+using std::invalid_argument;
+using std::ofstream;
+using std::runtime_error;
+using std::to_string;
+
 
 Song::Song() {
 }
@@ -76,14 +88,8 @@ void Song::save_to_cache() {
 	fs::create_directories(cache_file_path.parent_path());
 	ofstream cache_file(cache_file_path.string());
 
-	cache_file << title << ",";
-	cache_file << album << ",";
-	cache_file << artist << ",";
-	cache_file << genre << ",";
-	cache_file << track_of_album << ",";
-	cache_file << year << ",";
-	cache_file << album_artist << ",";
-	cache_file << artwork_file_path.string() << endl;
+	// Write out all song data to the file
+	cache_file << csv_encode({ title, album, artist, genre, to_string(track_of_album), to_string(year), album_artist, artwork_file_path.string(), is_favorited ? "1" : "0", to_string(plays) });
 }
 
 
@@ -104,7 +110,7 @@ void Song::set_from_cache(fs::path path) {
 		throw runtime_error("not in cache");
 	}
 
-	vector<string> parsed_csv = parse_csv_string_to_vector(csv_cache_line);
+	vector<string> parsed_csv = csv_decode(csv_cache_line);
 
 	title = parsed_csv[0];
 	album = parsed_csv[1];
@@ -115,6 +121,8 @@ void Song::set_from_cache(fs::path path) {
 	// Out of order because this was added after the fact
 	album_artist = parsed_csv[6];
 	artwork_file_path = fs::path(parsed_csv[7]);
+	is_favorited = parsed_csv[8] == "1";
+	plays = stoi(parsed_csv[9]);
 }
 
 
@@ -216,6 +224,12 @@ void Song::set_from_file(fs::path path) {
 		cout << "successfully wrote out artwork file " << artwork_file_path.string() << endl << endl;
 	}
 	else cout << "didn't need to write out artwork file -- it's already there " << artwork_file_path.string() << endl << endl;
+
+	// Is favorited (false because this song must be new to the user's library)
+	is_favorited = false;
+
+	// Play count (0 because this song must be new to the user's library)
+	plays = 0;
 }
 
 void Song::print() {
@@ -230,4 +244,10 @@ void Song::print() {
 
 	for (int i = 0; i < 40; i++) cout << "-";
 	cout << endl;
+}
+
+void Song::increment_plays() {
+	plays++;
+	// Update the cache
+	save_to_cache();
 }
