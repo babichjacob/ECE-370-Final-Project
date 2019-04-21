@@ -1,5 +1,17 @@
 #include "library.h"
 
+#include <filesystem>
+#include <iostream>
+#include <map>
+#include <string>
+#include <unordered_map>
+
+using std::cout;
+using std::endl;
+using std::map;
+using std::runtime_error;
+using std::unordered_map;
+
 
 Songs find_all_songs() {
 	fs::recursive_directory_iterator music_directory = fs::recursive_directory_iterator(MUSIC_DIR);
