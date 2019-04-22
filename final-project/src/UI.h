@@ -1,10 +1,13 @@
-#pragma once
+﻿#pragma once
 
+#include <algorithm>
 #include <filesystem>
 
 #include "ofMain.h"
 #include "Album.h"
 #include "Artist.h"
+#include "library.h"
+#include "preferences.h"
 #include "Song.h"
 
 constexpr auto ICONS_DIR = "bin/data/.MyTunes/icons";
@@ -40,7 +43,7 @@ typedef struct IconBundle IconBundle;
 template <class T>
 struct MediaEntry {
 	int index;
-	T media;
+	T* media;
 	ofRectangle hitbox;
 
 	// Specific to songs
@@ -56,9 +59,14 @@ public:
 	// See enum above
 	ViewMode view_mode;
 
-	Artists *artists_map;
-	Albums *albums_map;
-	Songs *all_songs;
+	Preferences* preferences;
+
+	Artists* artists_map;
+	Albums* albums_map;
+	Songs* all_songs;
+
+	// How the songs in the song view are sorted
+	vector<string> sorted_by ;
 
 	// Icons (public -- necessary because of click detection in ofApp)
 	map<string, IconBundle> icons;
@@ -85,12 +93,20 @@ public:
 	ofImage currently_playing_song_image;
 
 
+
+	// Columns
+	ofRectangle columns;
+	vector<string> columns_entries = { u8"♥", "Song Name", "Album", "Artist", "Genre", "Year", "Plays" };
+	vector<int> columns_edges = { 0, 36, 570, 970, 1370, 1620, 1700 };
+	// End columns
+
+
 	UI();
 	~UI();
 	void setup();
 	void windowResized();
 
-	void draw_full(bool is_paused, Song song, ofSoundPlayer player);
+	void draw_full(bool is_paused, Song* song, ofSoundPlayer player);
 
 	void draw_play_zone();
 	void draw_icons(bool is_paused);
@@ -98,7 +114,7 @@ public:
 	
 	void resize_artwork();
 
-	void draw_currently_playing_zone(Song song, ofSoundPlayer player);
+	void draw_currently_playing_zone(Song* song, ofSoundPlayer player);
 
 	void draw_columns_header();
 
@@ -111,6 +127,8 @@ public:
 
 	void scroll_up();
 	void scroll_down();
+
+	void add_to_sort_order(string key);
 
 private:
 	// Color palette
@@ -172,9 +190,6 @@ private:
 	// End icons
 
 	// Columns
-	ofRectangle columns;
-	vector<string> columns_entries = {"", "Song Name", "Album", "Artist", "Genre", "Year", "Plays"};
-	vector<int> columns_edges = {0, 24, 570, 970, 1370, 1620, 1700};
 	int columns_border_size = 2;
 	// End columns
 

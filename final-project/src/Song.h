@@ -25,13 +25,13 @@ public:
 	string artist;
 	string genre;
 	// Ex 4 (out of the total number of songs in the album)
-	int track_of_album;
-	int year;
+	int track_of_album = 0;
+	int year = 1900;
 	// Out of order because these were added after the fact
 	string album_artist;
 	fs::path artwork_file_path;
-	bool is_favorited;
-	int plays;
+	bool is_favorited = false;
+	int plays = 0;
 
 
 	fs::path music_file_path;
@@ -45,4 +45,4 @@ public:
 	void toggle_favorited();
 };
 
-typedef vector<Song> Songs;
+typedef vector<Song*> Songs;

@@ -1,5 +1,6 @@
 #include "library.h"
 
+#include <algorithm>
 #include <filesystem>
 #include <iostream>
 #include <iterator>
@@ -12,6 +13,7 @@ using std::cout;
 using std::endl;
 using std::map;
 using std::runtime_error;
+using std::stable_sort;
 using std::unordered_map;
 
 
@@ -35,10 +37,7 @@ bool find_all_songs_incrementally(Songs* previous_effort, fs::recursive_director
 		// Check files
 		if (fs::is_regular_file(path)) {
 			try {
-				Song song(path.path());
-
-				cout << "loaded" << endl;
-				song.print();
+				Song* song = new Song(path.path());
 
 				// The runtime_error thrown in the constructor above will prevent every line from here on from executing
 				// if Song object creation failed
@@ -61,7 +60,7 @@ Albums build_albums(Songs songs) {
 	Albums albums_map;
 
 	for (auto& song : songs) {
-		pair<string, string> key(song.album_artist, song.album);
+		pair<string, string> key(song->album_artist, song->album);
 		// Find a pre-existing album
 		if (albums_map.count(key) > 0) {
 			Albums::iterator map_entry = albums_map.find(key);
@@ -71,7 +70,7 @@ Albums build_albums(Songs songs) {
 		}
 		// Or make one if necessary
 		else {
-			Album new_album(song.album);
+			Album new_album(song->album);
 			// Add this song to the album (has to be done before adding it to the map)
 			new_album.songs.push_back(song);
 			pair<pair<string, string>, Album> map_entry(key, new_album);
@@ -115,50 +114,48 @@ Artists build_artists(Albums albums) {
 }
 
 
-Songs rebuild_songs(Artists artists_map, int number_of_songs) {
-	// Create a new vector of songs sorted by artist, then by album
-	// (though this should be the case by default for a well-maintained library,
-	//  not every library is well-maintained)
-	Songs sorted_songs;
-
-	// Open up enough space for the number of songs we already have
-	sorted_songs.reserve(number_of_songs);
-
-	// For every artist,
-	for (auto& artists_map_entry : artists_map) {
-		// For each of their albums,
-		// (we assume that `reorder_songs()` has already been called for each album)
-		for (auto& album : artists_map_entry.second.albums) {
-			// Do something called "extending" the vector
-			// AKA adding all the contents from one vector to another
-			sorted_songs.insert(sorted_songs.end(), album.songs.begin(), album.songs.end());
-		}
-	}
-
-	return sorted_songs;
-}
-
 void sort_songs(Songs* songs, vector<string> by) {
-
 	// Iterate in reverse over the sorting keys
 	for (auto it = by.rbegin(); it != by.rend(); it++) {
 		string key = *it;
 
-		auto comparator = [&key](const auto& left, const auto& right) {
-			if (key == "album_artist") {
-				return left.album_artist < right.album_artist;
+		auto comparator = [&key](const auto & left, const auto & right) {
+			if (key == "album") {
+				return left->album < right->album;
+			}
+			else if (key == "album_artist") {
+				return left->album_artist < right->album_artist;
+			}
+			else if (key == "artist") {
+				return left->artist < right->artist;
+			}
+			else if (key == "genre") {
+				return left->genre < right->genre;
+			}
+			else if (key == "is_favorited") {
+				// Descending too (i.e. favorited before unfavorited)
+				return left->is_favorited > right->is_favorited;
 			}
 			else if (key == "plays") {
-				return left.album_artist < right.album_artist;
+				// Prefer descending order (hence > instead of <) for play count
+				return left->plays > right->plays;
 			}
-			else {
-				// Do nothing because this key is not recognized
-				return true;
+			else if (key == "title") {
+				return left->title < right->title;
 			}
+			else if (key == "track_of_album") {
+				return left->track_of_album < right->track_of_album;
+			}
+			else if (key == "year") {
+				// Descending
+				return left->year > right->year;
+			}
+			// Do nothing because this key is not recognized
+			return false;
 		};
 
 		cout << "sorting songs by " << key << endl;
-		sort(songs->begin(), songs->end(), comparator);
+		stable_sort(songs->begin(), songs->end(), comparator);
 	}
 }
 

@@ -11,9 +11,7 @@ using std::string;
 
 constexpr auto PREFERENCES_FILE = "bin/data/.MyTunes/preferences.csv";
 
-// Global variable
 // User preferences are just a key-value store of strings, stored in a CSV file
-
 typedef map<string, string> Preferences;
 
 

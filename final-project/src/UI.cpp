@@ -1,6 +1,9 @@
 ﻿#include "UI.h"
 
 
+using std::find;
+
+
 UI::UI()
 {
 }
@@ -12,17 +15,32 @@ UI::~UI()
 
 void UI::setup() {
 	cout << "UI::setup: " << "about to load fonts" << endl;
-	font_md.load(".MyTunes/fonts/Heebo/Heebo-Light.ttf", font_md_size);
-	font_lg.load(".MyTunes/fonts/Heebo/Heebo-Light.ttf", font_lg_size);
-	font_xl.load(".MyTunes/fonts/Heebo/Heebo-Thin.ttf",  font_xl_size);
 
-	ofTrueTypeFontSettings font_md_unicode_settings(".MyTunes/fonts/Noto/NotoSans-Light.ttf", font_md_unicode_size);
+	ofTrueTypeFontSettings font_md_settings(".MyTunes/fonts/Heebo/Heebo-Light.ttf", font_md_size);
+	font_md_settings.antialiased = true;
+	font_md.load(font_md_settings);
+
+	ofTrueTypeFontSettings font_lg_settings(".MyTunes/fonts/Heebo/Heebo-Light.ttf", font_lg_size);
+	font_lg_settings.antialiased = true;
+	font_lg.load(font_lg_settings);
+
+	ofTrueTypeFontSettings font_xl_settings(".MyTunes/fonts/Heebo/Heebo-Thin.ttf", font_xl_size);
+	font_xl_settings.antialiased = true;
+	font_xl.load(font_xl_settings);
+
+	ofTrueTypeFontSettings font_md_unicode_settings(".MyTunes/fonts/Noto/NotoEmoji-Regular.ttf", font_md_unicode_size);
 	font_md_unicode_settings.antialiased = true;
-	font_md_unicode_settings.ranges ={
-			ofUnicode::AdditionalEmoticons,
-			ofUnicode::Arrows,
-			ofUnicode::Emoticons
-		};
+	font_md_unicode_settings.ranges = {
+		ofUnicode::AdditionalEmoticons,
+		ofUnicode::Arrows,
+		ofUnicode::Dingbats,
+		ofUnicode::Emoticons,
+		ofUnicode::GeometricShapes,
+		ofUnicode::Latin,
+		ofUnicode::Latin1Supplement,
+		ofUnicode::MiscSymbols,
+		ofUnicode::MiscSymbolsAndPictographs,
+	};
 	font_md_unicode.load(font_md_unicode_settings);
 	cout << "UI::setup: " << "done loading fonts" << endl;
 
@@ -61,8 +79,16 @@ void UI::setup() {
 	}
 	cout << "UI::setup: " << "icons loaded" << endl;
 
-	// Song view by default
-	view_mode = view_song;
+	// Load in the user's preferences
+	// View mode, with "view_song" as default
+	string view_mode_as_string = preferences_get(*preferences, "view_mode", "view_song");
+	if (view_mode_as_string == "view_song") view_mode = view_song;
+	else if (view_mode_as_string == "view_album") view_mode = view_album;
+	else if (view_mode_as_string == "view_artist") view_mode = view_artist;
+
+	// Sort mode
+	string sorted_by_as_string = preferences_get(*preferences, "sorted_by", "album_artist,album,track_of_album");
+	sorted_by = csv_decode(sorted_by_as_string);
 
 	// All constant values in UI elements
 	play_zone.x = 0;
@@ -130,7 +156,7 @@ void UI::windowResized() {
 	top_song_in_list = 0;
 }
 
-void UI::draw_full(bool is_paused, Song song, ofSoundPlayer player) {
+void UI::draw_full(bool is_paused, Song* song, ofSoundPlayer player) {
 	// Don't draw a UI until the songs are loaded in
 	// (see below for the fade-in animation that happens once loading is complete)
 	if (frame_loaded == -1) return;
@@ -230,7 +256,7 @@ void UI::resize_artwork() {
 }
 
 
-void UI::draw_currently_playing_zone(Song song, ofSoundPlayer player) {
+void UI::draw_currently_playing_zone(Song* song, ofSoundPlayer player) {
 	// Draw the rounded rectangle background
 	ofSetColor(cool_gray_lighter);
 	ofDrawRectRounded(currently_playing_zone, currently_playing_zone_rounded_radius);
@@ -248,16 +274,16 @@ void UI::draw_currently_playing_zone(Song song, ofSoundPlayer player) {
 
 	// Title
 	ofSetColor(cool_black);
-	font_md.drawString(song.title,  currently_playing_text_x_pos, currently_playing_zone.y + font_md_size + padding_standard);
+	font_md.drawString(song->title,  currently_playing_text_x_pos, currently_playing_zone.y + font_md_size + padding_standard);
 
 	// Album
 	ofSetColor(cool_gray_darker);
 	// (+1 on the y for aesthetic reasons)
-	font_md.drawString(song.album,  currently_playing_text_x_pos, 1+ currently_playing_zone.y + currently_playing_zone.height / 2 + font_md_size / 2);
+	font_md.drawString(song->album,  currently_playing_text_x_pos, 1+ currently_playing_zone.y + currently_playing_zone.height / 2 + font_md_size / 2);
 
 	// Artist
 	ofSetColor(cool_black);
-	font_md.drawString(song.artist, currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height - padding_standard);
+	font_md.drawString(song->artist, currently_playing_text_x_pos, currently_playing_zone.y + currently_playing_zone.height - padding_standard);
 
 	// Progress slider
 	// Outer
@@ -311,9 +337,15 @@ void UI::draw_columns_header() {
 	ofDrawRectangle(columns.x, columns.y + columns.height, columns.width, columns_border_size);
 
 	// Draw text on top of the columns header
-	ofSetColor(cool_gray_darker);
 	for (int i = 0, n = columns_entries.size(); i < n; i++) {
-		font_md.drawString(columns_entries[i], columns_edges[i] + font_md_size, columns.y + columns.height / 2.0 + font_md_size / 2.0);
+		if (i == 0) {
+			ofSetColor(cool_gray_dark);
+			font_md_unicode.drawString(columns_entries[i], columns_edges[i] + font_md_unicode_size, columns.y + columns.height / 2.0 + font_md_unicode_size / 2.0);
+			ofSetColor(cool_gray_darker);
+		}
+		else {
+			font_md.drawString(columns_entries[i], columns_edges[i] + font_md_size, columns.y + columns.height / 2.0 + font_md_size / 2.0);
+		}
 	}
 }
 
@@ -351,9 +383,6 @@ void UI::draw_album_view() {
 	// Clear the view zone
 	ofSetColor(ofGetBackgroundColor());
 	ofDrawRectangle(view_zone);
-
-	song_entries.clear();
-	// todo
 }
 
 
@@ -365,6 +394,7 @@ void UI::draw_song_view() {
 	song_entries.clear();
 
 	// Make sure that in small libraries, looping never exceeds the total number of songs
+	// This could also happen during incremental loading
 	// (otherwise the program crashes)
 	int n = min((int) all_songs->size(), songs_that_can_fit_on_screen);
 
@@ -372,12 +402,13 @@ void UI::draw_song_view() {
 	for (int j = 0; j < n; j++) {
 		int index = j + top_song_in_list;
 
-		Song this_song = (*all_songs)[index];
+		Song* this_song = (*all_songs)[index];
 		MediaEntry<Song> this_song_entry;
 
 		this_song_entry.index = index;
-
 		this_song_entry.media = this_song;
+
+		//cout << "pointer: " << this_song_entry.media;
 
 		// Hitbox / click detection
 		this_song_entry.hitbox.x = 0;
@@ -398,20 +429,19 @@ void UI::draw_song_view() {
 
 		// Write out song info (text)
 
-		ofSetColor(this_song.is_favorited ? cool_gray_darkest : cool_gray);
-		cout << " heart: \xE2\x9D\xA4 ❤️ <--";
-		font_md_unicode.drawString(this_song.is_favorited ? "❤️ \xE2\x9D\xA4" : "❤️ \xE2\x9D\xA4", columns_edges[0] + font_md_unicode_size, this_song_entry.hitbox.y + font_md_unicode_size + padding_song_entry);
+		ofSetColor(this_song->is_favorited ? cool_gray_dark : cool_gray_light);
+		font_md_unicode.drawString(u8"♥", columns_edges[0] + font_md_unicode_size, this_song_entry.hitbox.y + font_md_unicode_size + padding_song_entry);
 		
 		ofSetColor(cool_gray_darkest);
-		font_md.drawString(this_song.title,                    columns_edges[1] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
-		font_md.drawString(this_song.album,                    columns_edges[2] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
-		font_md.drawString(this_song.artist,                   columns_edges[3] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
-		font_md.drawString(this_song.genre,                    columns_edges[4] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
-		font_md.drawString(to_string(this_song.year),          columns_edges[5] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		font_md.drawString(this_song->title,                    columns_edges[1] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		font_md.drawString(this_song->album,                    columns_edges[2] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		font_md.drawString(this_song->artist,                   columns_edges[3] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		font_md.drawString(this_song->genre,                    columns_edges[4] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		font_md.drawString(to_string(this_song->year),          columns_edges[5] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
 		
 		// Only show the plays if the song has been played before
-		if (this_song.plays > 0) {
-			font_md.drawString(to_string(this_song.plays), columns_edges[6] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
+		if (this_song->plays > 0) {
+			font_md.drawString(to_string(this_song->plays), columns_edges[6] + font_md_size, this_song_entry.hitbox.y + font_md_size + padding_song_entry);
 		}
 	}
 }
@@ -471,4 +501,22 @@ string format_as_time(int minutes, int seconds) {
 	else seconds_as_string = to_string(seconds);
 
 	return to_string(minutes) + ":" + seconds_as_string;
+}
+
+void UI::add_to_sort_order(string key) {
+	auto it = find(sorted_by.begin(), sorted_by.end(), key);
+
+	bool was_already_at_the_front = it == sorted_by.begin();
+
+	// If this key is already being used, move it to the front
+	if (it != sorted_by.end()) sorted_by.erase(it);
+	sorted_by.insert(sorted_by.begin(), key);
+	
+	// Sort the songs again
+	// And re-draw the song view to reflect the change
+	// Only if there's a change
+	if (!was_already_at_the_front) {
+		sort_songs(all_songs, sorted_by);
+		draw_song_view();
+	}
 }

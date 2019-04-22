@@ -14,32 +14,32 @@ Album::Album(string name) {
 void Album::inherit_metadata() {
 	for (auto &song : songs) {
 		// Update list of genres
-		if (count(genres.begin(), genres.end(), song.genre) == 0) {
-			genres.push_back(song.genre);
+		if (count(genres.begin(), genres.end(), song->genre) == 0) {
+			genres.push_back(song->genre);
 		}
 
 		// Update minimum
-		if (year_range.first > song.year) {
-			year_range.first = song.year;
+		if (year_range.first > song->year) {
+			year_range.first = song->year;
 		}
 
 		// Update maximum
-		if (year_range.second < song.year) {
-			year_range.second = song.year;
+		if (year_range.second < song->year) {
+			year_range.second = song->year;
 		}
 
 		// Copy the artist from the song (they should all be in agreement)
-		artist = song.album_artist;
+		artist = song->album_artist;
 	}
 }
 
 
 void Album::reorder_songs() {
-	map<int, Song> songs_by_track_number;
+	map<int, Song*> songs_by_track_number;
 
 	// Rely on the ordered nature of map to do the sorting for us
 	for (auto &song : songs) {
-		songs_by_track_number.insert(pair<int, Song>(song.track_of_album, song));
+		songs_by_track_number.insert({ song->track_of_album, song });
 	}
 
 	// Clear the list of songs this album has so we can fill it back up
@@ -85,7 +85,7 @@ void Album::print() {
 
 	// Track listing
 	for (int i = 0, n = songs.size(); i < n; i++) {
-		cout << " " << i + 1 << ". " << songs[i].title << endl;
+		cout << " " << i + 1 << ". " << songs[i]->title << endl;
 	}
 
 	// Separator

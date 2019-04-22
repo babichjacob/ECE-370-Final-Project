@@ -7,6 +7,7 @@
 #include "preferences.h"
 #include "Song.h"
 #include "UI.h"
+#include "utils.h"
 
 
 class ofApp : public ofBaseApp{
@@ -24,6 +25,7 @@ class ofApp : public ofBaseApp{
 	// of whether or not it's paused
 	bool is_paused = true;
 
+	Song* currently_playing_song = nullptr;
 	int index_of_currently_playing_song = 0;
 
 	// How much time is skipped by a forward or rewind
@@ -54,5 +56,5 @@ class ofApp : public ofBaseApp{
 		void gotMessage(ofMessage msg);
 
 
-		void start_playing(Song song, int song_index);
+		void start_playing(Song* song, int song_index);
 };

@@ -16,7 +16,6 @@ bool find_all_songs_incrementally(Songs* previous_effort, fs::recursive_director
 Albums build_albums(Songs songs);
 Artists build_artists(Albums albums);
 
-Songs rebuild_songs(Artists artists_map, int number_of_songs);
 void sort_songs(Songs* songs, vector<string> by = { "album_artist", "album", "track_of_album" });
 
 void mp3_main();
