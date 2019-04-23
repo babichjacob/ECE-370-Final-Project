@@ -2,6 +2,7 @@
 
 
 using std::find;
+using std::min;
 
 
 UI::UI()
@@ -110,6 +111,9 @@ void UI::setup() {
 
 	volume_slider_inner.x = volume_slider_outer.x;
 
+	search_bar.height = 32;
+	search_bar.y = (play_zone.y + play_zone.height / 2) - search_bar.height/2;
+
 
 	columns.x = 0;
 	columns.y = play_zone.y+play_zone.height;
@@ -121,13 +125,11 @@ void UI::setup() {
 void UI::windowResized() {
 	play_zone.width = ofGetWidth();
 	
-	// Make the currently playing zone take up the remaining space not occupied by the icons
-	// (but no more than half the screen on big screens)
+	// Make the currently playing zone take up half the screen
 	currently_playing_zone.x = 510;
-	currently_playing_zone.width = ofGetWidth() - currently_playing_zone.x - padding_standard;
-	if (ofGetWidth() > 1300) currently_playing_zone.width = ofGetWidth() / 2;
-
-
+	//currently_playing_zone.width = ofGetWidth() - currently_playing_zone.x - padding_standard;
+	currently_playing_zone.width = ofGetWidth() / 2;
+	
 
 	// Update slider sizes and coordinates
 	song_slider_outer.x = currently_playing_zone.x + padding_left_song_slider;
@@ -136,6 +138,9 @@ void UI::windowResized() {
 
 	song_slider_inner.x = song_slider_outer.x;
 	song_slider_inner.y = song_slider_outer.y;
+
+	search_bar.x = currently_playing_zone.x + currently_playing_zone.width + padding_standard;
+	search_bar.width = ofGetWidth() - search_bar.x - padding_standard;
 
 	// Make the columns header take up the entire width of the window
 	columns.width = ofGetWidth();
@@ -173,6 +178,9 @@ void UI::draw_full(bool is_paused, Song* song, ofSoundPlayer player) {
 	// Draw the currently playing zone
 	draw_currently_playing_zone(song, player);
 
+	// Draw the search bar
+	draw_search_bar();
+
 	// Draw the columns header
 	draw_columns_header();
 
@@ -187,13 +195,6 @@ void UI::draw_full(bool is_paused, Song* song, ofSoundPlayer player) {
 	case view_artist:
 		draw_artist_view();
 		break;
-	}
-
-	// Do the fade-in animation only when necessary
-	if (ofGetFrameNum() - frame_loaded < transition_duration_frames) {
-		// Ranges from 0 to 1, where 0 is the very beginning and 1 is the end
-		float time_progress = ((float)(ofGetFrameNum() - frame_loaded)) / (float)transition_duration_frames;
-		draw_splash_screen(time_progress);
 	}
 }
 
@@ -249,6 +250,14 @@ void UI::draw_volume_slider(ofSoundPlayer player) {
 	ofDrawRectRounded(volume_slider_inner, volume_slider_inner.width/2);
 }
 
+void UI::draw_search_bar() {
+	ofSetColor(is_searching ? ofColor::white : cool_gray_lightest);
+
+	ofDrawRectRounded(search_bar, search_bar_rounded_radius);
+
+	ofSetColor(is_searching ? cool_gray_darkest : cool_gray_dark);
+	font_md.drawString(is_searching ? search_text : "Hit / to start searching your library", search_bar.x + font_md_size, search_bar.y + search_bar.height / 2.0 + font_md_size / 2.0);
+}
 
 
 void UI::resize_artwork() {
@@ -396,19 +405,22 @@ void UI::draw_song_view() {
 	// Make sure that in small libraries, looping never exceeds the total number of songs
 	// This could also happen during incremental loading
 	// (otherwise the program crashes)
-	int n = min((int) all_songs->size(), songs_that_can_fit_on_screen);
+	int n = min(static_cast<int>(all_songs->size()), songs_that_can_fit_on_screen);
+
+	if (is_searching && search_text != "") {
+		n = min(n, static_cast<int>(search_results->size()));
+	}
 
 	// Create a song entry (a bundle of related information) for every song
 	for (int j = 0; j < n; j++) {
 		int index = j + top_song_in_list;
 
-		Song* this_song = (*all_songs)[index];
+		Song* this_song = (is_searching && search_text != "") ? (*search_results)[index] : (*all_songs)[index];
 		MediaEntry<Song> this_song_entry;
 
 		this_song_entry.index = index;
 		this_song_entry.media = this_song;
 
-		//cout << "pointer: " << this_song_entry.media;
 
 		// Hitbox / click detection
 		this_song_entry.hitbox.x = 0;
@@ -462,7 +474,12 @@ void UI::scroll_up() {
 void UI::scroll_down() {
 	top_song_in_list += songs_to_scroll;
 	// Ensure scrolling cannot go past the last song
-	int should_be_highest_scroll = all_songs->size() - songs_that_can_fit_on_screen;
+	int song_list_size = all_songs->size();
+
+	if (is_searching && search_text != " ") song_list_size = min(song_list_size, static_cast<int>(search_results->size()));
+
+
+	int should_be_highest_scroll = max(0, song_list_size - songs_that_can_fit_on_screen);
 	if (top_song_in_list > should_be_highest_scroll) {
 		top_song_in_list = should_be_highest_scroll;
 		// Since we've scrolled to the bottom, make sure there are no songs being cut off at the end.

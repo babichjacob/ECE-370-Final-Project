@@ -17,7 +17,7 @@ using std::stable_sort;
 using std::unordered_map;
 
 
-bool find_all_songs_incrementally(Songs* previous_effort, fs::recursive_directory_iterator* music_directory, int* index) {
+bool find_all_songs_incrementally(Songs* previous_effort, fs::recursive_directory_iterator* music_directory, int* index, SearchEngine* se) {
 	// This is a foreach loop (much more modern than for loops)
 
 	fs::recursive_directory_iterator end_iterator;
@@ -43,6 +43,9 @@ bool find_all_songs_incrementally(Songs* previous_effort, fs::recursive_director
 				// if Song object creation failed
 				// in other words, this code will only execute for valid songs (MP3 files)
 				previous_effort->push_back(song);
+
+				// Index it in the search engine
+				search_index(se, song);
 
 				// Signal that it's possible for there to be more songs
 				return true;
@@ -154,7 +157,6 @@ void sort_songs(Songs* songs, vector<string> by) {
 			return false;
 		};
 
-		cout << "sorting songs by " << key << endl;
 		stable_sort(songs->begin(), songs->end(), comparator);
 	}
 }
@@ -168,7 +170,10 @@ void mp3_main() {
 	int loaded_index = 0;
 
 	fs::recursive_directory_iterator music_directory(MUSIC_DIR);
-	while (find_all_songs_incrementally(&all_songs, &music_directory, &loaded_index));
+
+	SearchEngine se;
+
+	while (find_all_songs_incrementally(&all_songs, &music_directory, &loaded_index, &se));
 
 	Albums albums_map = build_albums(all_songs);
 	Artists artists_map = build_artists(albums_map);

@@ -3,7 +3,7 @@
 
 
 //--------------------------------------------------------------
-void ofApp::setup(){
+void ofApp::setup() {
 	ofSetBackgroundColor(ofColor::white);
 	ofSetFrameRate(60);
 	ofSetBackgroundAuto(false);
@@ -22,15 +22,19 @@ void ofApp::setup(){
 }
 
 //--------------------------------------------------------------
-void ofApp::update(){
+void ofApp::update() {
 	// This is done in update so that there is an openFrameworks window
 	// open and available (otherwise it'll be confusing to the user why
 	// their program isn't opening when it's loading)
 	// Also, the first 4 frames have to be skipped because those never get painted on screen for some reason
 	// (I think the window isn't visible until the 5th frame, at least on Windows 10)
 
-	if (is_loading) {
-		is_loading = find_all_songs_incrementally(&all_songs, &music_directory, &loaded_index);
+	// Because openFrameworks cannot draw a frame on-screen until the 5th frame,
+	// we have to skip loading songs (a potentially slow operation)
+	// until we reach that
+	// to ensure the UI is drawn on-screen during the waiting time
+	if (is_loading && ofGetFrameNum() > 5) {
+		is_loading = find_all_songs_incrementally(&all_songs, &music_directory, &loaded_index, &search_engine);
 
 		albums_map = build_albums(all_songs);
 		artists_map = build_artists(albums_map);
@@ -47,7 +51,7 @@ void ofApp::update(){
 		int song_length_ms = round(player.getPositionMS() / player.getPosition());
 		if (song_length_ms - player.getPositionMS() <= 80) {
 			// When the song finishes, add 1 to its play count
-			all_songs[index_of_currently_playing_song]->increment_plays();
+			currently_playing_song->increment_plays();
 			// Because the play count was just changed, re-draw the song view if it's sorted by play count in any way
 			if (ui.view_mode == view_song && vector_contains(ui.sorted_by, static_cast<string>("plays"))) {
 				sort_songs(&all_songs, ui.sorted_by);
@@ -62,9 +66,15 @@ void ofApp::update(){
 
 //--------------------------------------------------------------
 void ofApp::draw() {
-	if (!is_loading && all_songs.size() == 0) {
+
+	if (is_loading) {
 		ui.draw_splash_screen(0);
-		ui.draw_no_songs();
+	}
+
+	if (all_songs.size() == 0) {
+		if (!is_loading) {
+			ui.draw_no_songs();
+		}
 	}
 	else {
 		ui.draw_full(is_paused, currently_playing_song, player);
@@ -72,9 +82,47 @@ void ofApp::draw() {
 }
 
 //--------------------------------------------------------------
-void ofApp::keyPressed(int key){
+void ofApp::keyPressed(int key) {
 	// Do not acknowledge any key presses if the library is empty
 	if (all_songs.size() == 0) return;
+
+	// If the user is searching,
+	if (ui.is_searching) {
+		// Until they hit enter (to exit search mode)
+		if (key == OF_KEY_RETURN) {
+			ui.is_searching = false;
+			ui.search_text = "";
+		}
+		// Backspace or delete deletes the last character in the query
+		else if (key == OF_KEY_BACKSPACE || key == OF_KEY_DEL) {
+			if (ui.search_text.size() > 0) {
+				ui.search_text.pop_back();
+				// Do a search
+				search_results = search_for(&search_engine, ui.search_text);
+				ui.search_results = &search_results;
+			}
+		}
+		// Intercept their keystrokes and add them to the search term
+		else {
+			// Ignore irrelevant keys that produce an undesirable character
+			if (key == OF_KEY_LEFT_SHIFT || key == OF_KEY_RIGHT_SHIFT) return;
+			if (key == OF_KEY_LEFT_CONTROL || key == OF_KEY_RIGHT_CONTROL) return;
+			if (key == OF_KEY_LEFT_ALT || key == OF_KEY_RIGHT_ALT) return;
+			if (key == OF_KEY_LEFT_COMMAND || key == OF_KEY_RIGHT_COMMAND) return;
+			if (key == OF_KEY_TAB) return;
+			if (key == 4) return;
+
+			if (!(key == ' ' && ui.search_text == "")) ui.search_text += static_cast<char>(key);
+
+			cout << "adding charnum " << static_cast<int>(key) << endl;
+
+			// Do a search
+			search_results = search_for(&search_engine, ui.search_text);
+			ui.search_results = &search_results;
+		}
+
+		return;
+	}
 
 	// When the spacebar is pressed,
 	if (key == ' ') {
@@ -94,7 +142,7 @@ void ofApp::keyPressed(int key){
 	// When the left arrow is pressed,
 	if (key == OF_KEY_LEFT) {
 		// Go back a song
-		int previous_index = index_of_currently_playing_song - 1;
+		int previous_index = (find(all_songs.begin(), all_songs.end(), currently_playing_song) - all_songs.begin()) - 1;
 		// Or loop around to the last song in the library
 		if (previous_index < 0) previous_index = all_songs.size() - 1;
 		start_playing(all_songs[previous_index], previous_index);
@@ -102,7 +150,7 @@ void ofApp::keyPressed(int key){
 	// When the right arrow is pressed,
 	if (key == OF_KEY_RIGHT) {
 		// Go forward a song
-		unsigned int next_index = index_of_currently_playing_song + 1;
+		unsigned int next_index = (find(all_songs.begin(), all_songs.end(), currently_playing_song) - all_songs.begin()) + 1;
 		// Or loop around to the first song in the library
 		if (next_index >= static_cast<unsigned int>(all_songs.size())) next_index = 0;
 		start_playing(all_songs[next_index], next_index);
@@ -138,31 +186,35 @@ void ofApp::keyPressed(int key){
 		// Increase the volume (without going past 1)
 		player.setVolume(min(1.0F, player.getVolume() + 0.1F));
 	}
+	// When the / key is pressed,
+	if (key == '/') {
+		ui.is_searching = true;
+	}
 
 }
 
 //--------------------------------------------------------------
-void ofApp::keyReleased(int key){
+void ofApp::keyReleased(int key) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseMoved(int x, int y ){
+void ofApp::mouseMoved(int x, int y) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseDragged(int x, int y, int button){
+void ofApp::mouseDragged(int x, int y, int button) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::mousePressed(int x, int y, int button){
+void ofApp::mousePressed(int x, int y, int button) {
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseReleased(int x, int y, int button){
-	for (auto &icons_entry : ui.icons) {
+void ofApp::mouseReleased(int x, int y, int button) {
+	for (auto& icons_entry : ui.icons) {
 		// Reset every icon to inactive
 		icons_entry.second.is_active = false;
 	}
@@ -231,13 +283,22 @@ void ofApp::mouseReleased(int x, int y, int button){
 					return;
 				}
 			}
+
+			// Check if it's within the search bar
+			if (ui.search_bar.inside(x, y)) {
+				// Toggle searching if so
+				ui.is_searching = !ui.is_searching;
+				if (!ui.is_searching) ui.search_text = "";
+
+				return;
+			}
 		}
 	}
 	// Or if a click is inside the columns header
 	else if (ui.columns.inside(x, y)) {
 		for (int i = 0, n = ui.columns_entries.size(); i < n; i++) {
 			int left_bound = ui.columns_edges[i];
-			int right_bound = (i == n-1) ? INT_MAX : ui.columns_edges[i+1];
+			int right_bound = (i == n - 1) ? INT_MAX : ui.columns_edges[i + 1];
 			// And the click happens in a particular header
 			if (left_bound <= x && x < right_bound) {
 				// Add that to the sort mode
@@ -248,6 +309,8 @@ void ofApp::mouseReleased(int x, int y, int button){
 				// Artist and album are omitted because those are how you open the album view
 				if (column_header_name == u8"♥") column_as_key = "is_favorited";
 				else if (column_header_name == "Song Name") column_as_key = "title";
+				else if (column_header_name == "Artist") column_as_key = "album_artist";
+				else if (column_header_name == "Album") column_as_key = "album";
 				else if (column_header_name == "Genre") column_as_key = "genre";
 				else if (column_header_name == "Year") column_as_key = "year";
 				else if (column_header_name == "Plays") column_as_key = "plays";
@@ -286,12 +349,12 @@ void ofApp::mouseReleased(int x, int y, int button){
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseEntered(int x, int y){
-
+void ofApp::mouseEntered(int x, int y) {
+	cout << "mouse at " << x << y << endl << endl;
 }
 
 //--------------------------------------------------------------
-void ofApp::mouseExited(int x, int y){
+void ofApp::mouseExited(int x, int y) {
 
 }
 
@@ -305,25 +368,24 @@ void ofApp::mouseScrolled(int x, int y, float scrollX, float scrollY) {
 }
 
 //--------------------------------------------------------------
-void ofApp::windowResized(int w, int h){
+void ofApp::windowResized(int w, int h) {
 	ui.windowResized();
 }
 
 //--------------------------------------------------------------
-void ofApp::gotMessage(ofMessage msg){
+void ofApp::gotMessage(ofMessage msg) {
 
 }
 
 //--------------------------------------------------------------
-void ofApp::dragEvent(ofDragInfo dragInfo){ 
+void ofApp::dragEvent(ofDragInfo dragInfo) {
 
 }
 
 
-void ofApp::start_playing(Song* song, int song_index) {
+void ofApp::start_playing(Song * song, int song_index) {
 	song->print();
 
-	index_of_currently_playing_song = song_index;
 	currently_playing_song = song;
 
 	// Load the artwork into the image
@@ -337,6 +399,6 @@ void ofApp::start_playing(Song* song, int song_index) {
 	// The second parameter determines whether or not the player can stream directly from the file
 	// without loading it in its entirety first (much faster)
 	player.load(song->music_file_path.string(), true);
-	
+
 	player.play();
 }

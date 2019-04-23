@@ -5,6 +5,7 @@
 #include "library.h"
 #include "ofMain.h"
 #include "preferences.h"
+#include "search_engine.h"
 #include "Song.h"
 #include "UI.h"
 #include "utils.h"
@@ -26,7 +27,6 @@ class ofApp : public ofBaseApp{
 	bool is_paused = true;
 
 	Song* currently_playing_song = nullptr;
-	int index_of_currently_playing_song = 0;
 
 	// How much time is skipped by a forward or rewind
 	int skip_time = 10;
@@ -36,6 +36,10 @@ class ofApp : public ofBaseApp{
 	Songs all_songs;
 	Albums albums_map;
 	Artists artists_map;
+
+	SearchEngine search_engine;
+
+	vector<Song*> search_results;
 
 	public:
 		void setup();

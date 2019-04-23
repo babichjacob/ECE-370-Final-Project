@@ -65,8 +65,10 @@ public:
 	Albums* albums_map;
 	Songs* all_songs;
 
+	vector<Song*>* search_results;
+
 	// How the songs in the song view are sorted
-	vector<string> sorted_by ;
+	vector<string> sorted_by;
 
 	// Icons (public -- necessary because of click detection in ofApp)
 	map<string, IconBundle> icons;
@@ -82,6 +84,9 @@ public:
 
 	ofRectangle volume_slider_inner;
 	ofRectangle volume_slider_outer;
+
+	// Search bar
+	ofRectangle search_bar;
 
 	// A vector of all the song, album, or artist entries visible on-screen at the moment 
 	// (public -- necessary because of click detection in ofApp)
@@ -100,6 +105,9 @@ public:
 	vector<int> columns_edges = { 0, 36, 570, 970, 1370, 1620, 1700 };
 	// End columns
 
+	bool is_searching = false;
+	string search_text;
+
 
 	UI();
 	~UI();
@@ -111,7 +119,8 @@ public:
 	void draw_play_zone();
 	void draw_icons(bool is_paused);
 	void draw_volume_slider(ofSoundPlayer player);
-	
+	void UI::draw_search_bar();
+
 	void resize_artwork();
 
 	void draw_currently_playing_zone(Song* song, ofSoundPlayer player);
@@ -173,6 +182,10 @@ private:
 
 	// The radius of the rounded corners on the currently playing zone
 	int currently_playing_zone_rounded_radius = 9;
+
+	// Search bar
+	int search_bar_rounded_radius = 9;
+	// End search bar
 
 	// Icons (private information before bundling)
 	// The name of each icon (also corresponds to a file in the `.MyTunes/icons` folder)

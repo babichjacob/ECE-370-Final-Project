@@ -198,8 +198,10 @@
     <ClCompile Include="src\main.cpp" />
     <ClCompile Include="src\ofApp.cpp" />
     <ClCompile Include="src\preferences.cpp" />
+    <ClCompile Include="src\search_engine.cpp" />
     <ClCompile Include="src\Song.cpp" />
     <ClCompile Include="src\UI.cpp" />
+    <ClCompile Include="src\utils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\addons\ofxGui\src\ofxBaseGui.h" />
@@ -220,6 +222,7 @@
     <ClInclude Include="src\library.h" />
     <ClInclude Include="src\ofApp.h" />
     <ClInclude Include="src\preferences.h" />
+    <ClInclude Include="src\search_engine.h" />
     <ClInclude Include="src\Song.h" />
     <ClInclude Include="src\UI.h" />
     <ClInclude Include="src\utils.h" />
